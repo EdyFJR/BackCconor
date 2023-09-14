@@ -1,0 +1,23 @@
+{
+  "name": "pos-cconor",
+  "version": "1.0.0",
+  "description": "POS CCONOR SOLUCIONES MX, ES UN POS QUE AYUDARA A LOS COMERCIOS LOCALES DE DURANGO A TENER ACCESO A SOFTWARE DE POS DE MANERA ACCESIBLE Y VIABLE",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Daetaurusseptem/POS-CCONOR.git"
+  },
+  "author": "Jaime Antonio Burciaga Alvarez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Daetaurusseptem/POS-CCONOR/issues"
+  },
+  "homepage": "https://github.com/Daetaurusseptem/POS-CCONOR#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.1"
+  }
+}
