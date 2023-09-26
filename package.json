@@ -2,9 +2,10 @@
   "name": "pos-cconor",
   "version": "1.0.0",
   "description": "POS CCONOR SOLUCIONES MX, ES UN POS QUE AYUDARA A LOS COMERCIOS LOCALES DE DURANGO A TENER ACCESO A SOFTWARE DE POS DE MANERA ACCESIBLE Y VIABLE",
-  "main": "app.js",
+  "main": "./dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npx nodemon dist/main.js",
+    "wachea": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,20 @@
   },
   "homepage": "https://github.com/Daetaurusseptem/POS-CCONOR#readme",
   "dependencies": {
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^20.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "mongoose": "^7.5.1"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.3",
+    "tsc-watch": "^6.0.4"
   }
 }
