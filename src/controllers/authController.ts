@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret } from 'jsonwebtoken';
 import  User  from '../models-sequelize/User';
 
 class AuthController {
@@ -15,7 +15,7 @@ class AuthController {
       }
 
       // Generar un token JWT con la información del usuario
-      const token = jwt.sign({ userId: user._id }, 'tu_clave_secreta', {
+      const token = jwt.sign({ userId: user._id }, process.env.JWT as Secret, {
         expiresIn: '1h', // Tiempo de expiración del token (ejemplo: 1 hora)
       });
 

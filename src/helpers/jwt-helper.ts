@@ -2,10 +2,31 @@ import jwt, { Secret } from 'jsonwebtoken';
 
 const key = process.env.JWT
 
-export function generateToken(userId: string): string {
-  return jwt.sign({ userId }, process.env.JWT as Secret, {
-    expiresIn: '1h', // Tiempo de expiración del token (ejemplo: 1 hora)
-  });
+export const generateToken = (uid:string) => {
+
+  return new Promise((resolve, reject) => {
+
+      const payload = { 
+          uid
+      };
+
+      jwt.sign(payload,
+          process.env.JWT_SECRET as string, {
+              expiresIn: '24h'
+          },
+          (err, token) => {
+              if (err) {
+                  console.log(token);
+                  reject('could not generate JWT')
+              }else{
+                  resolve(token)
+              }
+
+          }
+      )
+
+  })
+
 }
 
 export function validateToken(token: string): boolean {

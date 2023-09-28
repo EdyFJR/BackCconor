@@ -15,6 +15,7 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
   jwt.verify(token, process.env.JWT as Secret, (err, decoded) => {
     if (err) {
       console.log(err)
+      console.log(decoded)
       return res.status(401).json({ error: 'Token inválido' });
     }
 

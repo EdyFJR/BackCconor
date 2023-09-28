@@ -6,11 +6,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateToken = exports.generateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const key = process.env.JWT;
-function generateToken(userId) {
-    return jsonwebtoken_1.default.sign({ userId }, process.env.JWT, {
-        expiresIn: '1h', // Tiempo de expiración del token (ejemplo: 1 hora)
+const generateToken = (uid) => {
+    return new Promise((resolve, reject) => {
+        const payload = {
+            uid
+        };
+        jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: '24h'
+        }, (err, token) => {
+            if (err) {
+                console.log(token);
+                reject('could not generate JWT');
+            }
+            else {
+                resolve(token);
+            }
+        });
     });
-}
+};
 exports.generateToken = generateToken;
 function validateToken(token) {
     try {
