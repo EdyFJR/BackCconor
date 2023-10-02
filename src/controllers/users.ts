@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import User from '../models-sequelize/User';
 
+import bcrypt from "bcrypt";
+
 // Controlador para obtener todos los usuarios
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -35,19 +37,19 @@ export const getUserById = async (req: Request, res: Response) => {
 export const createUser = async (req: Request, res: Response) => {
   const { username, password, name, role } = req.body;
 
+  const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const newUser = new User({
-      username,
-      password,
-      name,
-      role
-    });
-    console.log(newUser)
-    const savedUser = await newUser.save();
-    res.json(savedUser); 
+      const newUser = new User({
+          username,
+          password: hashedPassword,
+          name,
+          role
+      });
+      const savedUser = await newUser.save();
+      res.json(savedUser);
   } catch (error) {
-    console.error('Error al crear el usuario:', error);
-    res.status(500).json({ error: 'Error al crear el usuario' });
+      console.error('Error al crear el usuario:', error);
+      res.status(500).json({ error: 'Error al crear el usuario' });
   }
 };
 
