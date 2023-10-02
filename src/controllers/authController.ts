@@ -15,9 +15,10 @@ class AuthController {
               return res.status(401).json({ error: 'Credenciales incorrectas' });
           }
 
-          const token = jwt.sign({ userId: user._id }, process.env.JWT as Secret, {
-              expiresIn: '1h',
-          });
+      // Generar un token JWT con la información del usuario
+      const token = jwt.sign({ userId: user._id }, 'tu_clave_secreta', {
+        expiresIn: '1h', // Tiempo de expiración del token (ejemplo: 1 hora)
+      });
 
           res.json({ token });
       } catch (error) {

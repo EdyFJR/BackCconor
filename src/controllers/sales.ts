@@ -53,7 +53,7 @@ export const createSale = async (req: Request, res: Response) => {
 };
 
 // Controlador para eliminar una venta por su ID
-export const deleteSale = async (req: Request, res: Response) => {
+export const cancelSale = async (req: Request, res: Response) => {
   const saleId = req.params.id;
 
   try {

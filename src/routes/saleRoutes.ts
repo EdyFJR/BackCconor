@@ -3,14 +3,24 @@ import {
   getAllSales,
   getSaleById,
   createSale,
-  deleteSale,
+  cancelSale,
 } from '../controllers/sales';
+import { verifyToken } from '../middleware/jwtMiddleware';
 
 const router = Router();
 
-router.get('/', getAllSales);
-router.get('/:id', getSaleById);
-router.post('/', createSale);
-router.delete('/:id', deleteSale);
+// Ruta para obtener todas las ventas
+router.get('/', verifyToken, getAllSales);
+
+// Ruta para obtener una venta por su ID
+router.get('/:id', verifyToken, getSaleById);
+
+// Ruta para crear una nueva venta
+router.post('/', verifyToken, createSale);
+
+// Ruta para actualizar una venta por su ID
+router.post('/cancel/:id', verifyToken, cancelSale);
+
+
 
 export default router;

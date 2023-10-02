@@ -15,6 +15,7 @@ function verifyToken(req, res, next) {
     jsonwebtoken_1.default.verify(token, process.env.JWT, (err, decoded) => {
         if (err) {
             console.log(err);
+            console.log(decoded);
             return res.status(401).json({ error: 'Token inválido' });
         }
         // Agregamos el ID del usuario decodificado a la solicitud para su posterior uso
