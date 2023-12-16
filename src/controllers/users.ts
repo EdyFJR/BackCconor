@@ -1,18 +1,135 @@
 import { Request, Response } from 'express';
-import User from '../models-sequelize/User';
+import User from '../models-mongoose/User';
+import Company from '../models-mongoose/Company';
 
 import bcrypt from "bcrypt";
+import Empresa from '../models-mongoose/Company';
+import mongoose from 'mongoose';
+
+
+
+
+export const isCompanyAdmin=async (req: Request, res: Response)=>{
+
+  const {companyId, adminId} = req.body;
+
+  const empresaAdmin = await Empresa.find({adminId});
+
+  if(!empresaAdmin){
+    return res.status(404).json({
+      ok:false,
+      msg:'El usuario no tiene permisos en esta empresa'
+    })
+  }
+
+}
 
 // Controlador para obtener todos los usuarios
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ role: { $in: ['admin', 'user'] } });
     res.json(users);
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
     res.status(500).json({ error: 'Error al obtener usuarios' });
   }
 };
+// Controlador para obtener todos los usuarios
+export const getNumberUsers = async (req: Request, res: Response) => {
+  try {
+    const numberOfUsers = await User.count();
+    res.json({
+      ok:true,
+      numberOfUsers
+    });
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+};
+
+export const getAllNonAdminUsersOfCompany = async (req: Request, res: Response) => {
+  const adminId = req.params.adminId;
+
+  try {
+    // Encuentra la empresa basada en adminId
+    const company = await Company.findOne({ adminId }).exec();
+    if (!company) {
+      return res.status(404).send('Empresa no encontrada.');
+    }
+
+    // Encuentra todos los usuarios de la empresa, excluyendo al administrador
+    const users = await User.find({ companyId: company._id, _id: { $ne: adminId } }).exec();
+    res.status(200).json({ok:true,users});
+  } catch (error) {
+    console.error('Error al obtener usuarios de la empresa:', error);
+    res.status(500).json({ok:false, message:`error:${error}`});
+  }
+};
+export const getAvailableAdmins = async (req:Request, res:Response) => {
+  try {
+    // Obtener todos los IDs de administradores de empresas
+    const companyAdminIds = await Company.find().distinct('adminId');
+
+    // Obtener todos los usuarios que son administradores y no están en la lista de adminIds
+    const availableAdmins = await User.find({
+      _id: { $nin: companyAdminIds },
+      role: 'admin'
+    });
+
+    res.status(200).json(availableAdmins);
+  } catch (error) {
+    res.status(500).json({ message: 'Hubo un error' });
+  }
+};
+export const  getCompanyAdmin = async (req:Request, res:Response) => {
+  try {
+    const {adminId} = req.params
+    // Obtener todos los IDs de administradores de empresas
+    const company = await Company.findOne({adminId:adminId})
+    console.log(company);
+    if(!company){
+      return res.status(404).json({
+        ok:false,
+        msg:'No se encontro la empresa'
+      })
+    }
+
+    
+    // Obtener todos los usuarios que son administradores y coinciden con los IDs validados
+    return res.status(200).json({
+      ok:true,
+      company
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Hubo un error' });
+  }
+};
+export const getAllAdmins = async (req:Request, res:Response) => {
+  try {
+    // Obtener todos los IDs de administradores de empresas
+    const companyAdminIds = await Company.find().distinct('adminId');
+
+    // Filtrar los IDs que son ObjectIds válidos
+    const validAdminIds = companyAdminIds.filter(id => id._id);
+
+    console.log(companyAdminIds);
+    console.log(validAdminIds);
+
+    // Obtener todos los usuarios que son administradores y coinciden con los IDs validados
+    const users = await User.find({
+      _id: { $in: companyAdminIds },
+      role: 'admin'
+    });
+
+    res.status(200).json({ok:true, users});
+  } catch (error) {
+    res.status(500).json({ message: 'Hubo un error' });
+  }
+};
+
+
 
 // Controlador para obtener un usuario por su ID
 export const getUserById = async (req: Request, res: Response) => { 
@@ -26,8 +143,9 @@ export const getUserById = async (req: Request, res: Response) => {
       return;
     }
 
-    res.json(user);
-  } catch (error) {
+    res.json({ok:true,user});
+  } catch (error) { 
+
     console.error('Error al obtener el usuario:', error);
     res.status(500).json({ error: 'Error al obtener el usuario' });
   }
@@ -35,15 +153,19 @@ export const getUserById = async (req: Request, res: Response) => {
 
 // Controlador para crear un nuevo usuario
 export const createUser = async (req: Request, res: Response) => {
-  const { username, password, name, role } = req.body;
+  const { username, password, name, role, email, companyId } = req.body;
 
+ 
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
       const newUser = new User({
+          companyId,
           username,
           password: hashedPassword,
           name,
-          role
+          role,
+          email,
+          img:'no-image'
       });
       const savedUser = await newUser.save();
       res.json(savedUser);
@@ -56,16 +178,16 @@ export const createUser = async (req: Request, res: Response) => {
 // Controlador para actualizar un usuario por su ID
 export const updateUser = async (req: Request, res: Response) => {
   const userId = req.params.id;
-  const { username, password, name, role } = req.body;
+  const { username, password, name, email } = req.body;
 
+ 
   try {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
         username,
-        password,
         name,
-        role,
+        email
       },
       { new: true }
     );
@@ -85,13 +207,20 @@ export const updateUser = async (req: Request, res: Response) => {
 // Controlador para eliminar un usuario por su ID
 export const deleteUser = async (req: Request, res: Response) => {
   const userId = req.params.id;
+  
+  const adminCompany = await Empresa.find({adminId:userId})
+  console.log(adminCompany.length);
+  
+  if(adminCompany.length>0){
+   return res.status(403).json({ok:false, msg:'El elemento tiene referencias asignadas a el, eliminalas!', adminCompany})
+  }
 
   try {
-    const deletedUser = await User.findByIdAndDelete(userId);
+    const deletedUser = await User.findByIdAndDelete(userId); 
 
-    if (!deletedUser) {
-      res.status(404).json({ error: 'Usuario no encontrado' });
-      return;
+    if (!deletedUser) { 
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+      
     }
  
     res.json({ message: 'Usuario eliminado con éxito' });

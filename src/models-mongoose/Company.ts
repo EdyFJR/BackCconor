@@ -1,32 +1,32 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 // Definición de la interfaz para el objeto de suscripción
-interface Suscripcion {
-    mes: string;
-    fechaCorte: Date;
-    estado: 'Activo' | 'Inactivo' | 'Pendiente';
-    montoPagado: number;
-    metodoPago: string;
-    referenciaPago: string;
+interface Suscription {
+    month: string;
+    cuttOfDate: Date;
+    state: 'Activo' | 'Inactivo' | 'Pendiente';
+    amountPaid: number;
+    payMethod: string;
+    payReference: string;
 }
 
 // Definición de la interfaz para el documento de empresa
 export interface EmpresaDocument extends Document {
-    nombre: string;
-    adminId: mongoose.Types.ObjectId; // Referencia al usuario administrador
-    imagen: string;
-    descripcion: string;
-    direccion: string;
-    telefono: string;
+    name: string;
+    adminId: mongoose.Types.ObjectId;
+    img?: string;
+    description: string;
+    address: string;
+    tel: string;
     email: string;
-    fechaCreacion: Date;
-    historialSuscripciones: Suscripcion[];
+    createdAt: Date;
+    SuscriptionsHistory?: Suscription[];
 }
 
 // Esquema del modelo de empresa
 const empresaSchema = new Schema<EmpresaDocument>({
-    nombre: {
-        type: String,
+    name: {
+        type: String, 
         required: true,
     },
     adminId: {
@@ -34,16 +34,16 @@ const empresaSchema = new Schema<EmpresaDocument>({
         ref: 'User', // Asegúrate de que esta es la referencia correcta al modelo de usuario
         required: true,
     },
-    imagen: String,
-    descripcion: String,
-    direccion: String,
-    telefono: String,
+    img: String,
+    description: String,
+    address: String,
+    tel: String,
     email: String,
-    fechaCreacion: {
+    createdAt: {
         type: Date,
         default: Date.now,
     },
-    historialSuscripciones: [{
+    SuscriptionsHistory: [{
         mes: String,
         fechaCorte: Date,
         estado: {

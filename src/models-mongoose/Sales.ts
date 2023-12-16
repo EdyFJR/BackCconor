@@ -8,11 +8,12 @@ export interface SaleDocument extends Document {
   date: Date;
   total: number;
   discount: number;
-  iva?: number;
   productsSold: Array<{
     productId: mongoose.Types.ObjectId;
     quantity: number;
-    unitPrice: number;
+    unitPrice: number; 
+    subtotal:number;
+   
   }>;
 }
 
@@ -36,24 +37,36 @@ const saleSchema = new Schema<SaleDocument>({
     type: Number,
     required: true,
   },
-  iva: Number, // Opcional, depende de tus necesidades
   productsSold: [
     {
       productId: {
         type: mongoose.Types.ObjectId,
-        ref: 'Product', // Referencia al modelo de producto
+        ref: 'Product',
         required: true,
       },
       quantity: {
         type: Number,
         required: true,
+        min: 1 
       },
       unitPrice: {
         type: Number,
-        required: true,
+        required: true
       },
+      subtotal: {
+        type: Number,
+        required: true
+      }
     },
   ],
+});
+
+
+saleSchema.pre('save', function(next) {
+  this.productsSold.forEach(product => {
+    product.subtotal = product.quantity * product.unitPrice;
+  });
+  next();
 });
 
 // Modelo de venta

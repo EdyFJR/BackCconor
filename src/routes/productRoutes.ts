@@ -1,28 +1,17 @@
-import { Router } from 'express';
-import {
-  getAllProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from '../controllers/products';
-import { verifyToken } from '../middleware/jwtMiddleware';
+// src/routes/productRoutes.ts
 
-const router = Router();
+import express from 'express';
+import { createProduct, deleteProduct, getAllCompanyProducts, getAllProducts, getProductById, updateProduct } from '../controllers/products';
 
-// Ruta para obtener todos los productos (disponible para administradores)
-router.get('/', verifyToken, getAllProducts);
 
-// Ruta para obtener un producto por su ID (disponible para usuarios y administradores)
+const router = express.Router();
+
+router.post('/', createProduct);
+router.get('/', getAllProducts);
+router.get('/company/:id', getAllCompanyProducts);
 router.get('/:id', getProductById);
+router.put('/:id', updateProduct);
+router.delete('/:id', deleteProduct);
 
-// Ruta para crear un nuevo producto (disponible para administradores)
-router.post('/', verifyToken, createProduct);
-
-// Ruta para actualizar un producto por su ID (disponible para administradores)
-router.put('/:id', verifyToken, updateProduct);
-
-// Ruta para eliminar un producto por su ID (disponible para administradores)
-router.delete('/:id', verifyToken, deleteProduct);
 
 export default router;

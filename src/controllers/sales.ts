@@ -1,72 +1,37 @@
+// src/controllers/saleController.ts
+
 import { Request, Response } from 'express';
-import  Sale  from '../models-sequelize/Sales';
+import Sale from '../models-mongoose/Sales';
 
-// Controlador para obtener todas las ventas
-export const getAllSales = async (req: Request, res: Response) => {
-  try {
-    const sales = await Sale.find();
-    res.json(sales);
-  } catch (error) {
-    console.error('Error al obtener ventas:', error);
-    res.status(500).json({ error: 'Error al obtener ventas' });
-  }
-};
 
-// Controlador para obtener una venta por su ID
-export const getSaleById = async (req: Request, res: Response) => {
-  const saleId = req.params.id;
-
-  try {
-    const sale = await Sale.findById(saleId);
-
-    if (!sale) {
-      res.status(404).json({ error: 'Venta no encontrada' });
-      return;
-    }
-
-    res.json(sale);
-  } catch (error) {
-    console.error('Error al obtener la venta:', error);
-    res.status(500).json({ error: 'Error al obtener la venta' });
-  }
-};
-
-// Controlador para crear una nueva venta
+// Crear una nueva venta
 export const createSale = async (req: Request, res: Response) => {
-  const { date, total, discount, iva, productsSold } = req.body;
-
-  try {
-    const newSale = new Sale({
-      date,
-      total,
-      discount,
-      iva,
-      productsSold,
-    });
-
-    const savedSale = await newSale.save();
-    res.json(savedSale);
-  } catch (error) {
-    console.error('Error al crear la venta:', error);
-    res.status(500).json({ error: 'Error al crear la venta' });
-  }
+    try {
+        const newSale = new Sale(req.body);
+        const savedSale = await newSale.save();
+        res.status(201).json(savedSale);
+    } catch (error) {
+        res.status(400).json({ message: error });
+    }
 };
 
-// Controlador para eliminar una venta por su ID
-export const cancelSale = async (req: Request, res: Response) => {
-  const saleId = req.params.id;
-
-  try {
-    const deletedSale = await Sale.findByIdAndDelete(saleId);
-
-    if (!deletedSale) {
-      res.status(404).json({ error: 'Venta no encontrada' });
-      return;
+// Obtener todas las ventas
+export const getAllSales = async (req: Request, res: Response) => {
+    try {
+        const sales = await Sale.find().populate('user').populate('productsSold.productId');
+        res.status(200).json(sales);
+    } catch (error) {
+        res.status(500).json({ message: error });
     }
+};
 
-    res.json({ message: 'Venta eliminada con éxito' });
-  } catch (error) {
-    console.error('Error al eliminar la venta:', error);
-    res.status(500).json({ error: 'Error al eliminar la venta' });
-  }
+// Obtener una venta por ID
+export const getSaleById = async (req: Request, res: Response) => {
+    try {
+        const sale = await Sale.findById(req.params.id).populate('user').populate('productsSold.productId');
+        if (!sale) return res.status(404).json({ message: 'Venta no encontrada' });
+        res.status(200).json(sale);
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
 };

@@ -1,26 +1,178 @@
-import jwt, { Secret } from 'jsonwebtoken';
+import { Response, Request, NextFunction }  from'express';
+import User from '../models-mongoose/User';
+import Empresa from '../models-mongoose/Company';
+const jwt  = require('jsonwebtoken');
+ 
+export const verifyToken = (req : any, resp : Response, next:NextFunction)=>{
 
-
-import { Request, Response, NextFunction } from 'express';
-
-
-export function verifyToken(req: Request, res: Response, next: NextFunction) {
-  const token = req.header('authorization');
-
-  if (!token) {
-    return res.status(403).json({ error: 'Token no proporcionado' });
-  }
-  console.log(token)
-  console.log(process.env.JWT)
-  jwt.verify(token, process.env.JWT as Secret, (err, decoded) => {
-    if (err) {
-      console.log(err)
-      console.log(decoded)
-      return res.status(401).json({ error: 'Token inválido' });
+    const token = req.header('x-token');
+    
+    if(!token){
+        return resp.status(401).json({
+            ok:false,
+            msg:`no hay token en la validacion`
+        });
     }
 
-    // Agregamos el ID del usuario decodificado a la solicitud para su posterior uso
-    req.userId = (decoded as any).userId;
-    next();
-  });
+    try {
+        
+        const {uid} = jwt.verify(token, process.env.JWT);
+    
+        req.uid = uid;
+
+        next();
+        
+    } catch (error) {
+        return resp.status(401).json({
+            ok:false, 
+            msg:`token no valido ${error}`
+        });
+    }
+
+}
+
+export const validarAdminOrSysAdmin = async(req:any, resp:Response, next:any)  => {
+
+    const uid = req.uid;
+    
+    try {
+        
+        const usuarioDB = await User.findById(uid );
+
+        if ( !usuarioDB ) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'Usuario no existe'
+            });
+        }
+        
+        if ( usuarioDB.role =='user' ) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso'
+            });
+        }
+
+
+        next();
+
+
+    } catch (error) {
+        console.log(error);
+        resp.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
+
+}
+export const validarSysAdmin = async(req:any, resp:Response, next:any)  => {
+
+    const uid = req.uid;
+    
+    try {
+        console.log(uid);
+        const usuarioDB = await User.findById(uid );
+
+        if ( !usuarioDB ) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'Usuario no existe'
+            });
+        }
+
+        if ( usuarioDB.get('role') !== 'sysadmin' ) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso'
+            });
+        }
+
+        next();
+
+
+    } catch (error) {
+        resp.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
+
+}
+export const validarAdmin = async(req:any, resp:Response, next:any)  => {
+
+    const uid = req.uid;
+    
+    try {
+        console.log(uid);
+        const usuarioDB = await User.findById(uid );
+
+        if ( !usuarioDB ) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'Usuario no existe'
+            });
+        }
+
+        if ( usuarioDB.get('role') !== 'admin' ) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso'
+            });
+        }
+
+        next();
+
+
+    } catch (error) {
+        console.log(error);
+        resp.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
+
+}
+export const validarAdminCompany = async(req:any, resp:Response, next:any)  => {
+
+    const uid = req.uid;
+    const {companyId }  =  req.params
+    
+    try {
+    
+        const usuarioDB = await User.findById(uid );
+
+        if ( !usuarioDB ) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'Usuario no existe'
+            });
+        }
+        const companyAdminId = await Empresa.findById(companyId);
+
+        if ( usuarioDB.get('role') !== 'admin' ) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso'
+            });
+        }
+        if ( !companyAdminId?.adminId == uid) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso en esta empresa',
+                
+            });
+        }
+
+        next();
+
+
+    } catch (error) {
+        console.log(error);
+        resp.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
+
 }

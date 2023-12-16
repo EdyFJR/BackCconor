@@ -3,15 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateToken = exports.generateToken = void 0;
+exports.generarJWT = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const key = process.env.JWT;
-const generateToken = (uid) => {
+const generarJWT = (uid) => {
     return new Promise((resolve, reject) => {
         const payload = {
             uid
         };
-        jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, {
+        jsonwebtoken_1.default.sign(payload, process.env.JWT, {
             expiresIn: '24h'
         }, (err, token) => {
             if (err) {
@@ -24,14 +23,4 @@ const generateToken = (uid) => {
         });
     });
 };
-exports.generateToken = generateToken;
-function validateToken(token) {
-    try {
-        jsonwebtoken_1.default.verify(token, process.env.JWT);
-        return true;
-    }
-    catch (error) {
-        return false;
-    }
-}
-exports.validateToken = validateToken;
+exports.generarJWT = generarJWT;

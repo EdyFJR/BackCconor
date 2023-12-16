@@ -1,32 +1,39 @@
+import { Request, Response } from 'express';
 import Stripe from 'stripe';
 
-const stripe = new Stripe('sk_test_TU_CLAVE_SECRETA', { apiVersion: '2023-10-16' });
+const stripe = new Stripe(process.env.STRIPE_DEV_KEY!, { apiVersion: '2023-10-16' });
 
-class SuscripcionController {
+
 
     // Obtener todos los productos (suscripciones) de Stripe
-    public async obtenerProductos(req:any, res:any) {
+    export const obtenerProductos = async(req:any, res:any) =>{
         try {
-            const productos = await stripe.products.list();
-            res.status(200).json(productos.data);
+            const stripeResponse = await stripe.products.list();
+            res.status(200).json({
+                ok:true,
+                stripeResponse
+            });
         } catch (error) {
             res.status(500).json({ message: 'Error al obtener los productos', error });
         }
     }
 
     // Obtener los precios de un producto específico
-    public async obtenerPreciosDeProducto(req:any, res:any) {
+    export const obtenerPreciosDeProducto = async(req:any, res:any) =>{
         try {
             const productId = req.params.id;            
             const precios = await stripe.prices.list({ product: productId });
-            res.status(200).json(precios.data);
+            res.status(200).json({
+                ok:true,
+                precios
+            });
         } catch (error) {
             res.status(500).json({ message: 'Error al obtener los precios del producto', error });
         }
     }
 
     // Crear una nueva suscripción
-    public async crearSuscripcion(req:any, res:any) {
+    export const crearSuscripcion = async(req:any, res:any) =>{
         try {
             const { customerId, priceId } = req.body;
 
@@ -46,7 +53,7 @@ class SuscripcionController {
         }
     }
 
-    public async crearCliente(req:any, res:any      ) {
+    export const crearCliente = async(req:Request, res:Response) =>{
         try {
             const { email, name, description } = req.body;
 
@@ -61,6 +68,4 @@ class SuscripcionController {
             res.status(500).json({ message: 'Error al crear el cliente', error });
         }
     }
-}
 
-export default new SuscripcionController();

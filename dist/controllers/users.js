@@ -12,12 +12,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllUsers = void 0;
-const User_1 = __importDefault(require("../models-sequelize/User"));
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllAdmins = exports.getCompanyAdmin = exports.getAvailableAdmins = exports.getAllNonAdminUsersOfCompany = exports.getNumberUsers = exports.getAllUsers = exports.isCompanyAdmin = void 0;
+const User_1 = __importDefault(require("../models-mongoose/User"));
+const Company_1 = __importDefault(require("../models-mongoose/Company"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const Company_2 = __importDefault(require("../models-mongoose/Company"));
+const isCompanyAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { companyId, adminId } = req.body;
+    const empresaAdmin = yield Company_2.default.find({ adminId });
+    if (!empresaAdmin) {
+        return res.status(404).json({
+            ok: false,
+            msg: 'El usuario no tiene permisos en esta empresa'
+        });
+    }
+});
+exports.isCompanyAdmin = isCompanyAdmin;
 // Controlador para obtener todos los usuarios
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield User_1.default.find();
+        const users = yield User_1.default.find({ role: { $in: ['admin', 'user'] } });
         res.json(users);
     }
     catch (error) {
@@ -26,6 +40,98 @@ const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getAllUsers = getAllUsers;
+// Controlador para obtener todos los usuarios
+const getNumberUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const numberOfUsers = yield User_1.default.count();
+        res.json({
+            ok: true,
+            numberOfUsers
+        });
+    }
+    catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({ error: 'Error al obtener usuarios' });
+    }
+});
+exports.getNumberUsers = getNumberUsers;
+const getAllNonAdminUsersOfCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const adminId = req.params.adminId;
+    try {
+        // Encuentra la empresa basada en adminId
+        const company = yield Company_1.default.findOne({ adminId }).exec();
+        if (!company) {
+            return res.status(404).send('Empresa no encontrada.');
+        }
+        // Encuentra todos los usuarios de la empresa, excluyendo al administrador
+        const users = yield User_1.default.find({ companyId: company._id, _id: { $ne: adminId } }).exec();
+        res.status(200).json({ ok: true, users });
+    }
+    catch (error) {
+        console.error('Error al obtener usuarios de la empresa:', error);
+        res.status(500).json({ ok: false, message: `error:${error}` });
+    }
+});
+exports.getAllNonAdminUsersOfCompany = getAllNonAdminUsersOfCompany;
+const getAvailableAdmins = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Obtener todos los IDs de administradores de empresas
+        const companyAdminIds = yield Company_1.default.find().distinct('adminId');
+        // Obtener todos los usuarios que son administradores y no están en la lista de adminIds
+        const availableAdmins = yield User_1.default.find({
+            _id: { $nin: companyAdminIds },
+            role: 'admin'
+        });
+        res.status(200).json(availableAdmins);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Hubo un error' });
+    }
+});
+exports.getAvailableAdmins = getAvailableAdmins;
+const getCompanyAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { adminId } = req.params;
+        // Obtener todos los IDs de administradores de empresas
+        const company = yield Company_1.default.findOne({ adminId: adminId });
+        console.log(company);
+        if (!company) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontro la empresa'
+            });
+        }
+        // Obtener todos los usuarios que son administradores y coinciden con los IDs validados
+        return res.status(200).json({
+            ok: true,
+            company
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Hubo un error' });
+    }
+});
+exports.getCompanyAdmin = getCompanyAdmin;
+const getAllAdmins = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Obtener todos los IDs de administradores de empresas
+        const companyAdminIds = yield Company_1.default.find().distinct('adminId');
+        // Filtrar los IDs que son ObjectIds válidos
+        const validAdminIds = companyAdminIds.filter(id => id._id);
+        console.log(companyAdminIds);
+        console.log(validAdminIds);
+        // Obtener todos los usuarios que son administradores y coinciden con los IDs validados
+        const users = yield User_1.default.find({
+            _id: { $in: companyAdminIds },
+            role: 'admin'
+        });
+        res.status(200).json({ ok: true, users });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Hubo un error' });
+    }
+});
+exports.getAllAdmins = getAllAdmins;
 // Controlador para obtener un usuario por su ID
 const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
@@ -35,7 +141,7 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             res.status(404).json({ error: 'Usuario no encontrado' });
             return;
         }
-        res.json(user);
+        res.json({ ok: true, user });
     }
     catch (error) {
         console.error('Error al obtener el usuario:', error);
@@ -45,15 +151,18 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getUserById = getUserById;
 // Controlador para crear un nuevo usuario
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, password, name, role } = req.body;
+    const { username, password, name, role, email, companyId } = req.body;
+    const hashedPassword = yield bcrypt_1.default.hash(password, 10);
     try {
         const newUser = new User_1.default({
+            companyId,
             username,
-            password,
+            password: hashedPassword,
             name,
-            role
+            role,
+            email,
+            img: 'no-image'
         });
-        console.log(newUser);
         const savedUser = yield newUser.save();
         res.json(savedUser);
     }
@@ -66,13 +175,12 @@ exports.createUser = createUser;
 // Controlador para actualizar un usuario por su ID
 const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
-    const { username, password, name, role } = req.body;
+    const { username, password, name, email } = req.body;
     try {
         const updatedUser = yield User_1.default.findByIdAndUpdate(userId, {
             username,
-            password,
             name,
-            role,
+            email
         }, { new: true });
         if (!updatedUser) {
             res.status(404).json({ error: 'Usuario no encontrado' });
@@ -89,11 +197,15 @@ exports.updateUser = updateUser;
 // Controlador para eliminar un usuario por su ID
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
+    const adminCompany = yield Company_2.default.find({ adminId: userId });
+    console.log(adminCompany.length);
+    if (adminCompany.length > 0) {
+        return res.status(403).json({ ok: false, msg: 'El elemento tiene referencias asignadas a el, eliminalas!', adminCompany });
+    }
     try {
         const deletedUser = yield User_1.default.findByIdAndDelete(userId);
         if (!deletedUser) {
-            res.status(404).json({ error: 'Usuario no encontrado' });
-            return;
+            return res.status(404).json({ error: 'Usuario no encontrado' });
         }
         res.json({ message: 'Usuario eliminado con éxito' });
     }

@@ -4,39 +4,53 @@ import { SaleDocument } from './Sales'; // Importa el modelo de ventas
 
 // Definición de la interfaz para el documento de producto
 export interface ProductDocument extends Document {
+
+
+  img: string;
   name: string;
-  price: number;
   description?: string;
-  expirationDate?: Date;
-  discount: number;
-  sales: Array<mongoose.Types.ObjectId | SaleDocument>; // Campo que hace referencia a las ventas
+  marca: string;
+  supplier: Schema.Types.ObjectId;
+  company: Schema.Types.ObjectId;
+  categories: Schema.Types.ObjectId[];
+  
 }
+
 
 // Esquema del modelo de producto
 const productSchema = new Schema<ProductDocument>({
+
+  img: {
+    type: String,
+    default: ''
+  },
   name: {
     type: String,
     required: true,
+    index: true
   },
-  price: {
-    type: Number,
-    required: true,
+
+  marca: {
+    type: String
   },
   description: String,
-  expirationDate: Date,
-  discount: {
-    type: Number,
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Empresa',
     required: true,
-    min: 0,
-    max: 100,
   },
-  sales: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Sale', // Referencia al modelo de venta
-    },
-  ],
+  supplier: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Supplier',
+    required: true,
+  },
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category'
+  }]
 });
+// Esquema del modelo de lote (si decides implementarlo)
+
 
 // Modelo de producto
 const Product = mongoose.model<ProductDocument>('Product', productSchema);

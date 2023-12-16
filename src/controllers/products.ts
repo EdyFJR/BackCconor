@@ -1,102 +1,69 @@
+// src/controllers/productController.ts
+
 import { Request, Response } from 'express';
-import Product from '../models-sequelize/Products';
+import Product from '../models-mongoose/Products';
 
-// Controlador para obtener todos los productos
-export const getAllProducts = async (req: Request, res: Response) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (error) {
-    console.error('Error al obtener productos:', error);
-    res.status(500).json({ error: 'Error al obtener productos' });
-  }
-};
 
-// Controlador para obtener un producto por su ID
-export const getProductById = async (req: Request, res: Response) => {
-  const productId = req.params.id;
-
-  try {
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      res.status(404).json({ error: 'Producto no encontrado' });
-      return;
-    }
-
-    res.json(product);
-  } catch (error) {
-    console.error('Error al obtener el producto:', error);
-    res.status(500).json({ error: 'Error al obtener el producto' });
-  }
-};
-
-// Controlador para crear un nuevo producto
+// Crear un nuevo producto
 export const createProduct = async (req: Request, res: Response) => {
-  const { name, price, description, expirationDate, discount } = req.body;
-
-  try {
-    const newProduct = new Product({
-      name,
-      price,
-      description,
-      expirationDate,
-      discount,
-    });
-
-    const savedProduct = await newProduct.save();
-    res.json(savedProduct);
-  } catch (error) {
-    console.error('Error al crear el producto:', error);
-    res.status(500).json({ error: 'Error al crear el producto' });
-  }
+    try {
+        const newProduct = new Product(req.body);
+        newProduct.img=''
+        const savedProduct = await newProduct.save();
+        res.status(201).json(savedProduct);
+    } catch (error) {
+        res.status(400).json({ message: error });
+    }
 };
 
-// Controlador para actualizar un producto por su ID
+// Obtener todos los productos
+export const getAllProducts = async (req: Request, res: Response) => {
+    try {
+        const products = await Product.find().populate('supplier')
+        res.status(200).json({ok:true,products});
+    } catch (error) {
+        res.status(500).json({ message:error });
+    }
+};
+export const getAllCompanyProducts = async (req: Request, res: Response) => {
+    try {
+        const {id}=req.params
+        const products = await Product.find({company:id}).populate('supplier')
+        res.status(200).json({ok:true,products});
+    } catch (error) {
+        res.status(500).json({ message:error });
+    }
+};
+
+// Obtener un producto por ID
+export const getProductById = async (req: Request, res: Response) => {
+    try {
+        const product = await Product.findById(req.params.id).populate('supplier')
+        if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
+        res.status(200).json({ok:true,product});
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
+};
+
+// Actualizar un producto
 export const updateProduct = async (req: Request, res: Response) => {
-  const productId = req.params.id;
-  const { name, price, description, expirationDate, discount } = req.body;
-
-  try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      {
-        name,
-        price,
-        description,
-        expirationDate,
-        discount,
-      },
-      { new: true }
-    );
-
-    if (!updatedProduct) {
-      res.status(404).json({ error: 'Producto no encontrado' });
-      return;
+    try {
+        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedProduct) return res.status(404).json({ message: 'Producto no encontrado' });
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        res.status(400).json({ message: error });
     }
-
-    res.json(updatedProduct);
-  } catch (error) {
-    console.error('Error al actualizar el producto:', error);
-    res.status(500).json({ error: 'Error al actualizar el producto' });
-  }
 };
 
-// Controlador para eliminar un producto por su ID
+// Eliminar un producto
 export const deleteProduct = async (req: Request, res: Response) => {
-  const productId = req.params.id;
-
-  try {
-    const deletedProduct = await Product.findByIdAndDelete(productId);
-
-    if (!deletedProduct) {
-      res.status(404).json({ error: 'Producto no encontrado' });
-      return;
+    try {
+        const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+        if (!deletedProduct) return res.status(404).json({ message: 'Producto no encontrado' });
+        res.status(200).json({ message: 'Producto eliminado' });
+    } catch (error) {
+        res.status(500).json({ message: error });
     }
-
-    res.json({ message: 'Producto eliminado con éxito' });
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
-    res.status(500).json({ error: 'Error al eliminar el producto' });
-  }
 };
