@@ -7,11 +7,12 @@ const router = (0, express_1.Router)();
 // Ruta para obtener todos los categorias (disponible para administradores)
 router.get('/', jwtMiddleware_1.verifyToken, Categories_1.getAllCategories);
 // Ruta para obtener todos los categorias (disponible para administradores)
-router.get('/company/:companyId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminCompany, Categories_1.getCategoriesCompaniesPagination);
+router.get('/company/pages/:companyId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminCompany, Categories_1.getCategoriesCompaniesPagination);
+router.get('/company/:companyId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminCompany, Categories_1.getAllCategoriesCompany);
 // Ruta para obtener un categoria por su ID (disponible para usuarios y administradores)
 router.get('/:id', Categories_1.getCategoryById);
 // Ruta para crear un nuevo categoria (disponible para administradores)
-router.post('/', jwtMiddleware_1.verifyToken, Categories_1.createCategory);
+router.post('/:idEmpresa', jwtMiddleware_1.verifyToken, Categories_1.createCategory);
 // Ruta para actualizar un categoria por su ID (disponible para administradores)
 router.put('/:id', jwtMiddleware_1.verifyToken, Categories_1.updateCategory);
 // Ruta para eliminar un categoria por su ID (disponible para administradores)

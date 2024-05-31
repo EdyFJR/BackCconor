@@ -3,16 +3,35 @@
 import { Request, Response } from 'express';
 import Product from '../models-mongoose/Products';
 
+import { subirArchivo } from '../controllers/fileupload';
+import Empresa from '../models-mongoose/Company';
+
 
 // Crear un nuevo producto
 export const createProduct = async (req: Request, res: Response) => {
+    const {companyId} = req.params;
     try {
+        const companyDb = await Empresa.findById(companyId);
+        if(!companyDb){
+            return res.status(404).json({
+                ok:false,
+                msg:"No existe la empresa seleccionada"
+            })
+        }
+
+        req.body.company = companyId
+
         const newProduct = new Product(req.body);
-        newProduct.img=''
+        
         const savedProduct = await newProduct.save();
-        res.status(201).json(savedProduct);
+        
+        //subirImg
+        req.params.id = newProduct._id!
+        req.params.tipo = 'productos'
+
+        return res.status(201).json(savedProduct);
     } catch (error) {
-        res.status(400).json({ message: error });
+        return res.status(400).json({ message: error });
     }
 };
 
@@ -34,7 +53,7 @@ export const getAllCompanyProducts = async (req: Request, res: Response) => {
         res.status(500).json({ message:error });
     }
 };
-
+ 
 // Obtener un producto por ID
 export const getProductById = async (req: Request, res: Response) => {
     try {
@@ -67,3 +86,37 @@ export const deleteProduct = async (req: Request, res: Response) => {
         res.status(500).json({ message: error });
     }
 };
+
+
+export const searchProducts = async (req: Request, res: Response) => {
+    try {
+        const { page = 1, limit = 5, search = '', companyId } = req.query;
+    
+        if (!companyId) {
+          return res.status(400).json({ message: 'Company ID is required' });
+        }
+    
+        const query = {
+          company: companyId,
+          ...(search && { name: { $regex: new RegExp(search as string, 'i') } })
+        };
+    
+        const products = await Product.find(query)
+          .limit(Number(limit))
+          .skip((Number(page) - 1) * Number(limit));
+    
+        const total = await Product.countDocuments(query);
+    
+        res.status(200).json({
+          products,
+          totalPages: Math.ceil(total / Number(limit)),
+          currentPage: Number(page),
+          totalItems: total
+        });
+      } catch (error) {
+        res.status(500).json({ message: 'Error fetching products', error });
+      }
+  };
+
+
+  

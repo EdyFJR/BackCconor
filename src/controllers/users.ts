@@ -150,13 +150,38 @@ export const getUserById = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error al obtener el usuario' });
   }
 };
+export const getUserByIdSoloAdmin = async (req: Request, res: Response) => { 
+  const userId = req.params.id;
+
+  
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.json({ok:true,user});
+  } catch (error) { 
+
+    console.error('Error al obtener el usuario:', error);
+    res.status(500).json({ error: 'Error al obtener el usuario' });
+  }
+};
 
 // Controlador para crear un nuevo usuario
 export const createUser = async (req: Request, res: Response) => {
   const { username, password, name, role, email, companyId } = req.body;
 
- 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const userExistsDb = await User.findOne({username:username});
+  if(userExistsDb){
+    res.status(409).json({
+      msg:'Usuario ya existe'
+    });
+  }
+  const hashedPassword = await bcrypt.hash(password, 10); 
   try {
       const newUser = new User({
           companyId,
@@ -168,10 +193,10 @@ export const createUser = async (req: Request, res: Response) => {
           img:'no-image'
       });
       const savedUser = await newUser.save();
-      res.json(savedUser);
-  } catch (error) {
+      res.json({savedUser});
+  } catch (error) { 
       console.error('Error al crear el usuario:', error);
-      res.status(500).json({ error: 'Error al crear el usuario' });
+      res.status(500).json({ error: `Error al crear el usuario ${error} }`});
   }
 };
 

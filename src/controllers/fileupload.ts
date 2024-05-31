@@ -128,6 +128,8 @@ export const subirArchivo = (req: Request, res: Response) => {
 };
 
 
+
+
 const eliminarImagenS3 = async (bucket: string, key: string) => {
     const deleteParams = {
         Bucket: bucket,

@@ -6,8 +6,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const itemsController_1 = require("../controllers/itemsController");
+const jwtMiddleware_1 = require("../middleware/jwtMiddleware");
 const router = express_1.default.Router();
-router.post('/', itemsController_1.createItem);
+router.post('/:empresaId', itemsController_1.createItem);
+router.get('/:empresaId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarEmpresaUsuario, itemsController_1.getItems);
 router.get('/', itemsController_1.getAllItems);
 router.get('/company/:companyId', itemsController_1.getAllCompanyItemsPagination);
 router.get('/:id', itemsController_1.getItemById);

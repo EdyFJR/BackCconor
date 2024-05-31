@@ -13,18 +13,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.updateProduct = exports.getProductById = exports.getAllCompanyProducts = exports.getAllProducts = exports.createProduct = void 0;
+exports.searchProducts = exports.deleteProduct = exports.updateProduct = exports.getProductById = exports.getAllCompanyProducts = exports.getAllProducts = exports.createProduct = void 0;
 const Products_1 = __importDefault(require("../models-mongoose/Products"));
+const Company_1 = __importDefault(require("../models-mongoose/Company"));
 // Crear un nuevo producto
 const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { companyId } = req.params;
     try {
+        const companyDb = yield Company_1.default.findById(companyId);
+        if (!companyDb) {
+            return res.status(404).json({
+                ok: false,
+                msg: "No existe la empresa seleccionada"
+            });
+        }
+        req.body.company = companyId;
         const newProduct = new Products_1.default(req.body);
-        newProduct.img = '';
         const savedProduct = yield newProduct.save();
-        res.status(201).json(savedProduct);
+        //subirImg
+        req.params.id = newProduct._id;
+        req.params.tipo = 'productos';
+        return res.status(201).json(savedProduct);
     }
     catch (error) {
-        res.status(400).json({ message: error });
+        return res.status(400).json({ message: error });
     }
 });
 exports.createProduct = createProduct;
@@ -89,3 +101,26 @@ const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteProduct = deleteProduct;
+const searchProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { page = 1, limit = 5, search = '', companyId } = req.query;
+        if (!companyId) {
+            return res.status(400).json({ message: 'Company ID is required' });
+        }
+        const query = Object.assign({ company: companyId }, (search && { name: { $regex: new RegExp(search, 'i') } }));
+        const products = yield Products_1.default.find(query)
+            .limit(Number(limit))
+            .skip((Number(page) - 1) * Number(limit));
+        const total = yield Products_1.default.countDocuments(query);
+        res.status(200).json({
+            products,
+            totalPages: Math.ceil(total / Number(limit)),
+            currentPage: Number(page),
+            totalItems: total
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching products', error });
+    }
+});
+exports.searchProducts = searchProducts;

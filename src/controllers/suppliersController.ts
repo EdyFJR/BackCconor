@@ -45,7 +45,9 @@ export const getSupplierById = async (req: Request, res: Response) => {
     try {
         const supplier = await Supplier.findById(req.params.id);
         if (!supplier) return res.status(404).json({ message: 'Proveedor no encontrado' });
-        res.status(200).json(supplier);
+        res.status(200).json({
+            ok:true,
+            supplier});
     } catch (error) {
         res.status(500).json({ message: error });
     }
@@ -55,15 +57,15 @@ export const getCompanySuppliers = async (req: Request, res: Response) => {
         const companyId = req.params.companyId;
 
         // Verificar si la empresa existe
-        const company = await Empresa.findById(companyId);
+        const company = await Empresa.findById(companyId); 
         if (!company) {
-            return res.status(404).json({ message: 'Empresa no encontrada' });
+            return res.status(404).json({ message: 'Empresa no encontrada' }); 
         }
 
         const suppliers = await Supplier.find({ company: companyId });
-        res.status(200).json(suppliers);
+        res.status(200).json({ok:true,suppliers});
     } catch (error) {
-        res.status(500).json({ message: error });
+        res.status(500).json({ ok:false, error }); 
     }
 };
 

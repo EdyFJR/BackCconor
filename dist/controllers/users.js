@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllAdmins = exports.getCompanyAdmin = exports.getAvailableAdmins = exports.getAllNonAdminUsersOfCompany = exports.getNumberUsers = exports.getAllUsers = exports.isCompanyAdmin = void 0;
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserByIdSoloAdmin = exports.getUserById = exports.getAllAdmins = exports.getCompanyAdmin = exports.getAvailableAdmins = exports.getAllNonAdminUsersOfCompany = exports.getNumberUsers = exports.getAllUsers = exports.isCompanyAdmin = void 0;
 const User_1 = __importDefault(require("../models-mongoose/User"));
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -149,9 +149,31 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getUserById = getUserById;
+const getUserByIdSoloAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.params.id;
+    try {
+        const user = yield User_1.default.findById(userId);
+        if (!user) {
+            res.status(404).json({ error: 'Usuario no encontrado' });
+            return;
+        }
+        res.json({ ok: true, user });
+    }
+    catch (error) {
+        console.error('Error al obtener el usuario:', error);
+        res.status(500).json({ error: 'Error al obtener el usuario' });
+    }
+});
+exports.getUserByIdSoloAdmin = getUserByIdSoloAdmin;
 // Controlador para crear un nuevo usuario
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password, name, role, email, companyId } = req.body;
+    const userExistsDb = yield User_1.default.findOne({ username: username });
+    if (userExistsDb) {
+        res.status(409).json({
+            msg: 'Usuario ya existe'
+        });
+    }
     const hashedPassword = yield bcrypt_1.default.hash(password, 10);
     try {
         const newUser = new User_1.default({
@@ -164,11 +186,11 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             img: 'no-image'
         });
         const savedUser = yield newUser.save();
-        res.json(savedUser);
+        res.json({ savedUser });
     }
     catch (error) {
         console.error('Error al crear el usuario:', error);
-        res.status(500).json({ error: 'Error al crear el usuario' });
+        res.status(500).json({ error: `Error al crear el usuario ${error} }` });
     }
 });
 exports.createUser = createUser;

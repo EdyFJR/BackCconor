@@ -6,4 +6,5 @@ const router = Router();
 
 router.put('/:tipo/:id', subirArchivo);
 
-export default router;
+export default router; 
+  

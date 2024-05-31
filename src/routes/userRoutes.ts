@@ -11,8 +11,9 @@ import {
   getNumberUsers,
   getAllAdmins,
   getCompanyAdmin,
+  getUserByIdSoloAdmin,
 } from '../controllers/users';
-import { validarAdmin, validarAdminOrSysAdmin, validarSysAdmin, verifyToken } from '../middleware/jwtMiddleware';
+import { validarAdmin, validarAdminCompany, validarAdminOrSysAdmin, validarSysAdmin, verifyToken } from '../middleware/jwtMiddleware';
 
 const router = Router();
 
@@ -29,7 +30,8 @@ router.get('/company/:adminId', verifyToken, validarAdminOrSysAdmin, getAllNonAd
 
 // Rutas dinámicas para acciones específicas de un usuario
 router.get('/:id', verifyToken, validarSysAdmin, getUserById);
-router.post('/', createUser);
+router.get('/company/solo/:id', verifyToken, validarAdmin,validarAdminCompany, getUserByIdSoloAdmin);
+router.post('/',verifyToken, createUser);
 router.put('/:id', verifyToken, validarSysAdmin, updateUser);
 router.delete('/:id', verifyToken, validarSysAdmin, deleteUser);
 

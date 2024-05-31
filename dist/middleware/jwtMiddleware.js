@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validarAdminCompany = exports.validarAdmin = exports.validarSysAdmin = exports.validarAdminOrSysAdmin = exports.verifyToken = void 0;
+exports.validarEmpresaUsuario = exports.validarAdminCompany = exports.validarAdmin = exports.validarSysAdmin = exports.validarAdminOrSysAdmin = exports.verifyToken = void 0;
 const User_1 = __importDefault(require("../models-mongoose/User"));
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const jwt = require('jsonwebtoken');
@@ -154,3 +154,41 @@ const validarAdminCompany = (req, resp, next) => __awaiter(void 0, void 0, void 
     }
 });
 exports.validarAdminCompany = validarAdminCompany;
+const validarEmpresaUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.headers['x-token'];
+    console.log(token);
+    const { empresaId } = req.params;
+    if (!token) {
+        return res.status(401).json({
+            ok: false,
+            msg: 'No token provided'
+        });
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT); // Ajusta 'tu_secreto_jwt' según tu configuración
+        req.uid = decoded.uid;
+        const usuarioDB = yield User_1.default.findById(req.uid);
+        if (!usuarioDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Usuario no existe'
+            });
+        }
+        const empresaDB = yield Company_1.default.findById(empresaId);
+        if (!empresaDB || !usuarioDB.companyId == empresaId) {
+            return res.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para acceder a esta empresa'
+            });
+        }
+        next();
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Token inválido'
+        });
+    }
+});
+exports.validarEmpresaUsuario = validarEmpresaUsuario;

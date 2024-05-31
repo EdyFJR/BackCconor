@@ -11,28 +11,38 @@ import Item from '../models-mongoose/Item';
 // Crear un nuevo Item
 export const createItem = async (req: Request, res: Response) => {
     try {
+        console.log('crear item', req.body);
+        const productId = req.body.product
+        const {empresaId} = req.params
+        const producto=await Product.findById(productId)
+        const empresa=await Empresa.findById(empresaId)
 
 
-        //obtener companyId de Producto Padre
-        const fatherId = req.body.product
-        const producto=await Product.findById(fatherId)
         
         
         if(!producto){
-            res.status(404).json({
+            return res.status(404).json({
                 ok:false,
                 msg:"Producto No Existe"
             });
         }
+        if(!empresa){
+            return res.status(404).json({
+                ok:false,
+                msg:"Empresa No Existe"
+            });
+        }
         
-        req.body.company = producto?.company
+        req.body.company = empresaId
         
         const newItem = new Item(req.body);
 
         const savedItem = await newItem.save();
-        res.status(201).json(savedItem);
+
+        return res.status(201).json(savedItem);
     } catch (error) {
-        res.status(400).json({ message: error });
+        console.log(error);
+        return res.status(400).json(error);
     }
 };
 
@@ -126,6 +136,40 @@ export const deleteItem = async (req: Request, res: Response) => {
     }
 };
 
+
+export const getItems = async (req: Request, res: Response) => {
+    try {
+      const { empresaId } = req.params;
+      const { page = 1, size = 20, name } = req.query;
+      const pageNumber = parseInt(page as string, 10) || 1;
+      const pageSize = parseInt(size as string, 10) || 20;
+      const searchTerm = name ? (name as string) : '';
+      console.log(searchTerm);
+  
+      const query = {
+        company: empresaId,
+        ...(searchTerm && { name: { $regex: new RegExp(searchTerm, 'i') } })
+      };
+  
+      const items = await Item.find(query)
+        .populate('product')
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .exec();
+  
+      const totalItems = await Item.countDocuments(query);
+  
+      res.json({
+        totalItems,
+        currentPage: pageNumber,
+        totalPages: Math.ceil(totalItems / pageSize),
+        items
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving items', error: error });
+    }
+  };
+
 export default {
     createItem,
     getAllItems,
@@ -133,3 +177,5 @@ export default {
     updateItem,
     deleteItem
 };
+
+

@@ -15,7 +15,8 @@ router.get('/admins/:companyId/:adminId', jwtMiddleware_1.verifyToken, jwtMiddle
 router.get('/company/:adminId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminOrSysAdmin, users_1.getAllNonAdminUsersOfCompany);
 // Rutas dinámicas para acciones específicas de un usuario
 router.get('/:id', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.getUserById);
-router.post('/', users_1.createUser);
+router.get('/company/solo/:id', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdmin, jwtMiddleware_1.validarAdminCompany, users_1.getUserByIdSoloAdmin);
+router.post('/', jwtMiddleware_1.verifyToken, users_1.createUser);
 router.put('/:id', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.updateUser);
 router.delete('/:id', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.deleteUser);
 exports.default = router;

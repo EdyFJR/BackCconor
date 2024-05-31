@@ -18,8 +18,9 @@ const Category_1 = __importDefault(require("../models-mongoose/Category"));
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const createCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { company } = req.body;
-        const empresa = yield Company_1.default.findById(company);
+        const { idEmpresa } = req.params;
+        req.body.company = idEmpresa;
+        const empresa = yield Company_1.default.findById(idEmpresa);
         if (!empresa) {
             res.status(404).json({
                 ok: false,
@@ -31,6 +32,7 @@ const createCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(201).json(category);
     }
     catch (error) {
+        console.log(error);
         res.status(400).json({ message: 'La categoria ya existe o no es valida' });
     }
 });

@@ -176,3 +176,47 @@ export const validarAdminCompany = async(req:any, resp:Response, next:any)  => {
     }
 
 }
+
+export const validarEmpresaUsuario = async (req: any, res: Response, next: NextFunction) => {
+    const token = req.headers['x-token'];
+    console.log(token);
+    const { empresaId } = req.params;
+
+    if (!token) {
+        return res.status(401).json({
+            ok: false,
+            msg: 'No token provided'
+        });
+    }
+
+    try {
+        const decoded: any = jwt.verify(token, process.env.JWT);  // Ajusta 'tu_secreto_jwt' según tu configuración
+        req.uid = decoded.uid;
+
+        const usuarioDB = await User.findById(req.uid);
+
+        if (!usuarioDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Usuario no existe'
+            });
+        }
+ 
+        const empresaDB = await Empresa.findById(empresaId);
+
+        if (!empresaDB || !usuarioDB.companyId==empresaId) {
+            return res.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para acceder a esta empresa'
+            });
+        }
+
+        next();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Token inválido'
+        });
+    }
+};

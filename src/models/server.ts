@@ -13,6 +13,7 @@ import fileUploadRoutes from '../routes/fileUploadRoutes';
 import subscriptionRoutes from '../routes/subscriptionRoutes';
 import suppliersRoutes from '../routes/suppliersRoutes';
 import categoriesRoutes from '../routes/categoryRoutes';
+import cashRegisterRoutes from '../routes/cashRegister';
 
 export class Server {
   private app: Application;
@@ -48,6 +49,7 @@ export class Server {
     this.app.use('/api/subs', subscriptionRoutes ); // Rutas para stripe subscriptions
     this.app.use('/api/items', itemRoutes ); // Rutas para lotes
     this.app.use('/api/suppliers', suppliersRoutes ); // Rutas para lotes
+    this.app.use('/api/cash-registers', suppliersRoutes ); // Rutas para lotes
   }
 
   private async connectToAwsS3(): Promise<void> {

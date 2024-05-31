@@ -13,29 +13,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteItem = exports.updateItem = exports.getItemById = exports.getAllCompanyItemsPagination = exports.getAllCompanyItems = exports.getAllItems = exports.createItem = void 0;
+exports.getItems = exports.deleteItem = exports.updateItem = exports.getItemById = exports.getAllCompanyItemsPagination = exports.getAllCompanyItems = exports.getAllItems = exports.createItem = void 0;
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const Products_1 = __importDefault(require("../models-mongoose/Products"));
 const Item_1 = __importDefault(require("../models-mongoose/Item"));
 // Crear un nuevo Item
 const createItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        //obtener companyId de Producto Padre
-        const fatherId = req.body.product;
-        const producto = yield Products_1.default.findById(fatherId);
+        console.log('crear item', req.body);
+        const productId = req.body.product;
+        const { empresaId } = req.params;
+        const producto = yield Products_1.default.findById(productId);
+        const empresa = yield Company_1.default.findById(empresaId);
         if (!producto) {
-            res.status(404).json({
+            return res.status(404).json({
                 ok: false,
                 msg: "Producto No Existe"
             });
         }
-        req.body.company = producto === null || producto === void 0 ? void 0 : producto.company;
+        if (!empresa) {
+            return res.status(404).json({
+                ok: false,
+                msg: "Empresa No Existe"
+            });
+        }
+        req.body.company = empresaId;
         const newItem = new Item_1.default(req.body);
         const savedItem = yield newItem.save();
-        res.status(201).json(savedItem);
+        return res.status(201).json(savedItem);
     }
     catch (error) {
-        res.status(400).json({ message: error });
+        console.log(error);
+        return res.status(400).json(error);
     }
 });
 exports.createItem = createItem;
@@ -135,6 +144,33 @@ const deleteItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteItem = deleteItem;
+const getItems = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { empresaId } = req.params;
+        const { page = 1, size = 20, name } = req.query;
+        const pageNumber = parseInt(page, 10) || 1;
+        const pageSize = parseInt(size, 10) || 20;
+        const searchTerm = name ? name : '';
+        console.log(searchTerm);
+        const query = Object.assign({ company: empresaId }, (searchTerm && { name: { $regex: new RegExp(searchTerm, 'i') } }));
+        const items = yield Item_1.default.find(query)
+            .populate('product')
+            .skip((pageNumber - 1) * pageSize)
+            .limit(pageSize)
+            .exec();
+        const totalItems = yield Item_1.default.countDocuments(query);
+        res.json({
+            totalItems,
+            currentPage: pageNumber,
+            totalPages: Math.ceil(totalItems / pageSize),
+            items
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error retrieving items', error: error });
+    }
+});
+exports.getItems = getItems;
 exports.default = {
     createItem: exports.createItem,
     getAllItems: exports.getAllItems,

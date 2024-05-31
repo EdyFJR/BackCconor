@@ -64,7 +64,10 @@ const getSupplierById = (req, res) => __awaiter(void 0, void 0, void 0, function
         const supplier = yield Supplier_1.default.findById(req.params.id);
         if (!supplier)
             return res.status(404).json({ message: 'Proveedor no encontrado' });
-        res.status(200).json(supplier);
+        res.status(200).json({
+            ok: true,
+            supplier
+        });
     }
     catch (error) {
         res.status(500).json({ message: error });
@@ -80,10 +83,10 @@ const getCompanySuppliers = (req, res) => __awaiter(void 0, void 0, void 0, func
             return res.status(404).json({ message: 'Empresa no encontrada' });
         }
         const suppliers = yield Supplier_1.default.find({ company: companyId });
-        res.status(200).json(suppliers);
+        res.status(200).json({ ok: true, suppliers });
     }
     catch (error) {
-        res.status(500).json({ message: error });
+        res.status(500).json({ ok: false, error });
     }
 });
 exports.getCompanySuppliers = getCompanySuppliers;
