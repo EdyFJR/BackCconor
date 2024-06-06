@@ -6,6 +6,8 @@ import Sale from '../models-mongoose/Sales';
 export const openCashRegister = async (req: Request, res: Response) => {
   try {
     const { user, initialAmount } = req.body;
+    console.log(user);
+    console.log(initialAmount);
     const newCashRegister = new CashRegister({
       user,
       initialAmount,
@@ -15,7 +17,7 @@ export const openCashRegister = async (req: Request, res: Response) => {
       endDate: new Date(),
       notes: '',
       closed: false
-    });
+    }); 
 
     const savedCashRegister = await newCashRegister.save();
     res.status(201).json(savedCashRegister);
@@ -23,7 +25,7 @@ export const openCashRegister = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error opening cash register', error });
   }
 };
-
+  
 // Cerrar caja
 export const closeCashRegister = async (req: Request, res: Response) => {
   try {
@@ -32,10 +34,16 @@ export const closeCashRegister = async (req: Request, res: Response) => {
 
     const cashRegister = await CashRegister.findById(id).populate('sales');
     if (!cashRegister) {
-      return res.status(404).json({ message: 'Cash register not found' });
+      return res.status(404).json({ 
+        message: 'Cash register not found' 
+      });
     }
 
-    const sales = await Sale.find({ user: cashRegister.user, date: { $gte: cashRegister.startDate, $lte: new Date() } });
+    const sales = await Sale.find({ 
+      user: cashRegister.user, 
+      date: { $gte: cashRegister.startDate, $lte: new Date()
+        
+       } });
 
     let totalCash = 0, totalCredit = 0, totalDebit = 0;
 
@@ -69,6 +77,21 @@ export const closeCashRegister = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error closing cash register', error});
   }
 };
+
+export const hasOpenCashRegister = async (req: Request, res: Response) => {
+  try {
+
+    const { userId } = req.params;
+    const openCashRegister = await CashRegister.findOne({ user: userId, closed: false });
+    
+    res
+    .status(200)
+    .json(!!openCashRegister);
+  } catch (error) {
+    res.status(500).json({ message: 'Error checking open cash register', error });
+  }
+};
+
 
 // Obtener todos los cortes de caja
 export const getCashRegisters = async (req: Request, res: Response) => {

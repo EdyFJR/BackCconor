@@ -8,7 +8,7 @@ export interface SaleDocument extends Document {
   date: Date;
   total: number;
   discount: number;
-  paymentReference:string;
+  paymentReference?:string;
   productsSold: Array<{
     productId: mongoose.Types.ObjectId;
     quantity: number;

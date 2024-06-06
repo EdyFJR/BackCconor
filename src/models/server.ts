@@ -49,7 +49,7 @@ export class Server {
     this.app.use('/api/subs', subscriptionRoutes ); // Rutas para stripe subscriptions
     this.app.use('/api/items', itemRoutes ); // Rutas para lotes
     this.app.use('/api/suppliers', suppliersRoutes ); // Rutas para lotes
-    this.app.use('/api/cash-registers', suppliersRoutes ); // Rutas para lotes
+    this.app.use('/api/cash-registers', cashRegisterRoutes ); // Rutas para lotes
   }
 
   private async connectToAwsS3(): Promise<void> {
@@ -62,7 +62,7 @@ export class Server {
   private async connectToDatabase(): Promise<void> {
     try { 
       require('../config/db');
-      
+       
       
       console.log('Connection has been established successfully.');
     } catch (error) {
