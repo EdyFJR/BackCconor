@@ -108,24 +108,37 @@ export const  getCompanyAdmin = async (req:Request, res:Response) => {
 };
 export const getAllAdmins = async (req:Request, res:Response) => {
   try {
+  
+      const admins = await User.find({role:'admin'})
+    
+    
+    res.status(200).
+    json({
+      ok:true,
+      users:admins
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Hubo un error' });
+  }
+};
+export const getUnassignedAdmins = async (req: Request, res: Response) => {
+  try {
     // Obtener todos los IDs de administradores de empresas
     const companyAdminIds = await Company.find().distinct('adminId');
 
-    // Filtrar los IDs que son ObjectIds válidos
-    const validAdminIds = companyAdminIds.filter(id => id._id);
+    // Convertir ObjectIds a cadenas para comparación
+    const companyAdminIdsString = companyAdminIds.map(id => id.toString());
 
-    console.log(companyAdminIds);
-    console.log(validAdminIds);
+    // Obtener todos los usuarios que tienen el rol de 'admin'
+    const allAdmins = await User.find({ role: 'admin' });
 
-    // Obtener todos los usuarios que son administradores y coinciden con los IDs validados
-    const users = await User.find({
-      _id: { $in: companyAdminIds },
-      role: 'admin'
-    });
+    // Filtrar administradores que no están asignados a ninguna empresa
+    const unassignedAdmins = allAdmins.filter(admin => !companyAdminIdsString.includes(admin._id.toString()));
 
-    res.status(200).json({ok:true, users});
+    res.status(200).json({ ok: true, users: unassignedAdmins });
   } catch (error) {
-    res.status(500).json({ message: 'Hubo un error' });
+    
+    res.status(500).json({ message: 'Hubo un error', error});
   }
 };
 

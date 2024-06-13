@@ -8,13 +8,13 @@ export interface SaleDocument extends Document {
   date: Date;
   total: number;
   discount: number;
-  paymentReference?:string;
+  paymentReference?: string;
   productsSold: Array<{
     productId: mongoose.Types.ObjectId;
     quantity: number;
     unitPrice: number; 
-    subtotal:number;
-    paymentMethod:'credit'|'cash'|'debit'
+    subtotal: number;
+    paymentMethod: 'credit' | 'cash' |'debit'
    
   }>;
 }

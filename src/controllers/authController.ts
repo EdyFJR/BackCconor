@@ -25,6 +25,8 @@ export const login = async  (req:Request, resp:Response)=>{
         }
 
          const validPassword = bcrypt.compareSync(password, usuarioDB.password);
+
+
          if(!validPassword){
              return resp.status(400).json({
                  ok:false,
@@ -33,6 +35,7 @@ export const login = async  (req:Request, resp:Response)=>{
          }
         
         const token = await generarJWT(usuarioDB._id);
+        
         return resp.status(200).json({
             ok:true,
             token,

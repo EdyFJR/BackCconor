@@ -179,7 +179,7 @@ export const getItems = async (req: Request, res: Response) => {
       }
   
       const query = {
-        category,
+        categories: { $in: [category] },
         ...(search && { name: { $regex: search, $options: 'i' } })
       };
   
@@ -210,10 +210,9 @@ export const getItems = async (req: Request, res: Response) => {
         currentPage: Number(page)
       });
     } catch (error) {
-      res.status(500).json({ message: 'Error fetching items', error: error });
+      res.status(500).json({ message: 'Error fetching items', error });
     }
   };
-
 export default {
     createItem,
     getAllItems,

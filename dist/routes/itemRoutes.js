@@ -15,4 +15,5 @@ router.get('/company/:companyId', itemsController_1.getAllCompanyItemsPagination
 router.get('/:id', itemsController_1.getItemById);
 router.put('/:id', itemsController_1.updateItem);
 router.delete('/:id', itemsController_1.deleteItem);
+router.get('/by-category/:companyId', [jwtMiddleware_1.verifyToken], itemsController_1.getItemsByCategory);
 exports.default = router;

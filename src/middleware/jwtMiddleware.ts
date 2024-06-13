@@ -6,7 +6,9 @@ const jwt  = require('jsonwebtoken');
 export const verifyToken = (req : any, resp : Response, next:NextFunction)=>{
 
     const token = req.header('x-token');
-    
+
+    console.log(req);
+
     if(!token){
         return resp.status(401).json({
             ok:false,
@@ -17,12 +19,13 @@ export const verifyToken = (req : any, resp : Response, next:NextFunction)=>{
     try {
         
         const {uid} = jwt.verify(token, process.env.JWT);
+        console.log(uid);
     
         req.uid = uid;
 
         next();
         
-    } catch (error) {
+    } catch (error) { 
         return resp.status(401).json({
             ok:false, 
             msg:`token no valido ${error}`
@@ -30,7 +33,6 @@ export const verifyToken = (req : any, resp : Response, next:NextFunction)=>{
     }
 
 }
-
 export const validarAdminOrSysAdmin = async(req:any, resp:Response, next:any)  => {
 
     const uid = req.uid;
@@ -133,6 +135,49 @@ export const validarAdmin = async(req:any, resp:Response, next:any)  => {
     }
 
 }
+export const validarUserCompany = async(req:any, resp:Response, next:any)  => {
+
+    const uid = req.uid;
+    const {companyId }  =  req.params
+    
+    try {
+    
+        const usuarioDB = await User.findById(uid );
+
+        if ( !usuarioDB ) {
+            return resp.status(404).json({
+                ok: false, 
+                msg: 'Usuario no existe'
+            });
+        }
+        const companyAdminId = await Empresa.findById(companyId);
+
+        if ( usuarioDB.get('role') !== 'user' ) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso'
+            });
+        }
+        if ( !usuarioDB.companyId == uid) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso en esta empresa',
+                
+            });
+        }
+
+        next();
+
+
+    } catch (error) {
+        console.log(error);
+        resp.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
+
+}
 export const validarAdminCompany = async(req:any, resp:Response, next:any)  => {
 
     const uid = req.uid;
@@ -176,7 +221,6 @@ export const validarAdminCompany = async(req:any, resp:Response, next:any)  => {
     }
 
 }
-
 export const validarEmpresaUsuario = async (req: any, res: Response, next: NextFunction) => {
     const token = req.headers['x-token'];
     console.log(token);

@@ -10,9 +10,15 @@ const getMenuFrontEnd = (role = 'admin') => {
             submenu: []
         }
     ];
-    if (role === 'admin') {
+    if (role === ' admin ') {
         menu[0].title = 'ADMIN TOOLS';
         menu[0].id = 'admin';
+        menu[0].icon = 'bi bi-cone-striped';
+        menu[0].submenu.unshift({ title: 'Empresa', url: 'admin/company', icon: 'bi bi-building-fill' }, { title: 'Usuarios', url: 'admin/users', icon: 'bi bi-people-fill' }, { title: 'Productos', url: 'admin/products', icon: 'bi bi-bag-fill' }, { title: 'Proveedores', url: 'admin/products', icon: 'bi bi-file-earmark-person' }, { title: 'Lotes', url: 'admin/products', icon: 'bi bi-box2-fill' }, { title: 'Categorias', url: 'admin/categories', icon: 'bi bi-bookmark-fill' });
+    }
+    if (role === 'user') {
+        menu[0].title = 'USUARIO TOOLS';
+        menu[0].id = 'user';
         menu[0].icon = 'bi bi-cone-striped';
         menu[0].submenu.unshift({ title: 'Empresa', url: 'admin/company', icon: 'bi bi-building-fill' }, { title: 'Usuarios', url: 'admin/users', icon: 'bi bi-people-fill' }, { title: 'Productos', url: 'admin/products', icon: 'bi bi-bag-fill' }, { title: 'Proveedores', url: 'admin/products', icon: 'bi bi-file-earmark-person' }, { title: 'Lotes', url: 'admin/products', icon: 'bi bi-box2-fill' }, { title: 'Categorias', url: 'admin/categories', icon: 'bi bi-bookmark-fill' });
     }

@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validarEmpresaUsuario = exports.validarAdminCompany = exports.validarAdmin = exports.validarSysAdmin = exports.validarAdminOrSysAdmin = exports.verifyToken = void 0;
+exports.validarEmpresaUsuario = exports.validarAdminCompany = exports.validarUserCompany = exports.validarAdmin = exports.validarSysAdmin = exports.validarAdminOrSysAdmin = exports.verifyToken = void 0;
 const User_1 = __importDefault(require("../models-mongoose/User"));
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const jwt = require('jsonwebtoken');
 const verifyToken = (req, resp, next) => {
     const token = req.header('x-token');
+    console.log(req);
     if (!token) {
         return resp.status(401).json({
             ok: false,
@@ -26,6 +27,7 @@ const verifyToken = (req, resp, next) => {
     }
     try {
         const { uid } = jwt.verify(token, process.env.JWT);
+        console.log(uid);
         req.uid = uid;
         next();
     }
@@ -119,6 +121,41 @@ const validarAdmin = (req, resp, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.validarAdmin = validarAdmin;
+const validarUserCompany = (req, resp, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const uid = req.uid;
+    const { companyId } = req.params;
+    try {
+        const usuarioDB = yield User_1.default.findById(uid);
+        if (!usuarioDB) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'Usuario no existe'
+            });
+        }
+        const companyAdminId = yield Company_1.default.findById(companyId);
+        if (usuarioDB.get('role') !== 'user') {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso'
+            });
+        }
+        if (!usuarioDB.companyId == uid) {
+            return resp.status(403).json({
+                ok: false,
+                msg: 'No tiene privilegios para hacer eso en esta empresa',
+            });
+        }
+        next();
+    }
+    catch (error) {
+        console.log(error);
+        resp.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        });
+    }
+});
+exports.validarUserCompany = validarUserCompany;
 const validarAdminCompany = (req, resp, next) => __awaiter(void 0, void 0, void 0, function* () {
     const uid = req.uid;
     const { companyId } = req.params;

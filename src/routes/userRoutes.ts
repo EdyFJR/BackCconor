@@ -12,6 +12,7 @@ import {
   getAllAdmins,
   getCompanyAdmin,
   getUserByIdSoloAdmin,
+  getUnassignedAdmins,
 } from '../controllers/users';
 import { validarAdmin, validarAdminCompany, validarAdminOrSysAdmin, validarSysAdmin, verifyToken } from '../middleware/jwtMiddleware';
 
@@ -22,6 +23,7 @@ router.get('/', verifyToken, validarSysAdmin, getAllUsers);
 router.get('/number', verifyToken, validarSysAdmin, getNumberUsers);
 router.get('/admins/available', verifyToken, validarSysAdmin, getAvailableAdmins);
 router.get('/company/admins/all', verifyToken, validarSysAdmin, getAllAdmins);
+router.get('/company/admins/unassigned', verifyToken, validarSysAdmin, getUnassignedAdmins );
 router.get('/company/admin/:adminId', verifyToken, validarAdminOrSysAdmin, getCompanyAdmin);
 
 // Rutas dinámicas con parámetros específicos

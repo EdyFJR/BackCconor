@@ -29,7 +29,7 @@ export const createProduct = async (req: Request, res: Response) => {
         req.params.id = newProduct._id!
         req.params.tipo = 'productos'
 
-        return res.status(201).json(savedProduct);
+        return res.status(201).json({ok:true,savedProduct});
     } catch (error) {
         return res.status(400).json({ message: error });
     }

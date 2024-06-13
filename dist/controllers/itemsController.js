@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getItems = exports.deleteItem = exports.updateItem = exports.getItemById = exports.getAllCompanyItemsPagination = exports.getAllCompanyItems = exports.getAllItems = exports.createItem = void 0;
+exports.getItemsByCategory = exports.getItems = exports.deleteItem = exports.updateItem = exports.getItemById = exports.getAllCompanyItemsPagination = exports.getAllCompanyItems = exports.getAllItems = exports.createItem = void 0;
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const Products_1 = __importDefault(require("../models-mongoose/Products"));
 const Item_1 = __importDefault(require("../models-mongoose/Item"));
@@ -171,6 +171,40 @@ const getItems = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getItems = getItems;
+const getItemsByCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { category, search = '', page = 1, limit = 10 } = req.query;
+        if (!category) {
+            return res.status(400).json({ message: 'Category is required' });
+        }
+        const query = Object.assign({ categories: { $in: [category] } }, (search && { name: { $regex: search, $options: 'i' } }));
+        // Buscar productos por categoría y término de búsqueda
+        const products = yield Products_1.default.find(query);
+        if (products.length === 0) {
+            return res.status(404).json({ message: 'No products found for this category' });
+        }
+        // Obtener los IDs de los productos encontrados
+        const productIds = products.map(product => product._id);
+        // Calcular el total de ítems
+        const totalItems = yield Item_1.default.countDocuments({ product: { $in: productIds } });
+        // Buscar ítems que correspondan a los productos encontrados con paginación
+        const items = yield Item_1.default.find({ product: { $in: productIds } })
+            .populate('product')
+            .populate('company')
+            .skip((Number(page) - 1) * Number(limit))
+            .limit(Number(limit));
+        res.status(200).json({
+            items,
+            totalItems,
+            totalPages: Math.ceil(totalItems / Number(limit)),
+            currentPage: Number(page)
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching items', error });
+    }
+});
+exports.getItemsByCategory = getItemsByCategory;
 exports.default = {
     createItem: exports.createItem,
     getAllItems: exports.getAllItems,

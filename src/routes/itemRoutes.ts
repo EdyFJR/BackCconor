@@ -2,7 +2,7 @@
 
 import express from 'express';
 import { createItem, deleteItem, getAllCompanyItems, getAllCompanyItemsPagination, getAllItems, getItemById, getItems, getItemsByCategory, updateItem } from '../controllers/itemsController';
-import { validarEmpresaUsuario, verifyToken } from '../middleware/jwtMiddleware';
+import { validarEmpresaUsuario, validarUserCompany, verifyToken } from '../middleware/jwtMiddleware';
 
 
 const router = express.Router();
@@ -14,7 +14,8 @@ router.get('/company/:companyId', getAllCompanyItemsPagination);
 router.get('/:id', getItemById);
 router.put('/:id', updateItem);
 router.delete('/:id', deleteItem);
-router.get('/by-category',[verifyToken], getItemsByCategory);
+router.get('/by-category/:companyId',[verifyToken], getItemsByCategory);
 
 
 export default router;
+ 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { validarAdminCompany, verifyToken } from '../middleware/jwtMiddleware';
+import { validarAdminCompany, validarUserCompany, verifyToken } from '../middleware/jwtMiddleware';
 import { createCategory, deleteCategory,getAllCategories,getAllCategoriesCompany,getCategoriesCompaniesPagination,getCategoryById, updateCategory } from '../controllers/Categories';
 
 const router = Router();
@@ -10,7 +10,7 @@ router.get('/', verifyToken, getAllCategories);
 // Ruta para obtener todos los categorias (disponible para administradores)
 router.get('/company/pages/:companyId', verifyToken,validarAdminCompany, getCategoriesCompaniesPagination);
 
-router.get('/company/:companyId', verifyToken,validarAdminCompany, getAllCategoriesCompany);
+router.get('/company/:companyId', verifyToken, getAllCategoriesCompany);
 
 // Ruta para obtener un categoria por su ID (disponible para usuarios y administradores)
 router.get('/:id', getCategoryById);

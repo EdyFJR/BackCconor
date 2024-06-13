@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserByIdSoloAdmin = exports.getUserById = exports.getAllAdmins = exports.getCompanyAdmin = exports.getAvailableAdmins = exports.getAllNonAdminUsersOfCompany = exports.getNumberUsers = exports.getAllUsers = exports.isCompanyAdmin = void 0;
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserByIdSoloAdmin = exports.getUserById = exports.getUnassignedAdmins = exports.getAllAdmins = exports.getCompanyAdmin = exports.getAvailableAdmins = exports.getAllNonAdminUsersOfCompany = exports.getNumberUsers = exports.getAllUsers = exports.isCompanyAdmin = void 0;
 const User_1 = __importDefault(require("../models-mongoose/User"));
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -114,24 +114,35 @@ const getCompanyAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.getCompanyAdmin = getCompanyAdmin;
 const getAllAdmins = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Obtener todos los IDs de administradores de empresas
-        const companyAdminIds = yield Company_1.default.find().distinct('adminId');
-        // Filtrar los IDs que son ObjectIds válidos
-        const validAdminIds = companyAdminIds.filter(id => id._id);
-        console.log(companyAdminIds);
-        console.log(validAdminIds);
-        // Obtener todos los usuarios que son administradores y coinciden con los IDs validados
-        const users = yield User_1.default.find({
-            _id: { $in: companyAdminIds },
-            role: 'admin'
+        const admins = yield User_1.default.find({ role: 'admin' });
+        res.status(200).
+            json({
+            ok: true,
+            users: admins
         });
-        res.status(200).json({ ok: true, users });
     }
     catch (error) {
         res.status(500).json({ message: 'Hubo un error' });
     }
 });
 exports.getAllAdmins = getAllAdmins;
+const getUnassignedAdmins = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Obtener todos los IDs de administradores de empresas
+        const companyAdminIds = yield Company_1.default.find().distinct('adminId');
+        // Convertir ObjectIds a cadenas para comparación
+        const companyAdminIdsString = companyAdminIds.map(id => id.toString());
+        // Obtener todos los usuarios que tienen el rol de 'admin'
+        const allAdmins = yield User_1.default.find({ role: 'admin' });
+        // Filtrar administradores que no están asignados a ninguna empresa
+        const unassignedAdmins = allAdmins.filter(admin => !companyAdminIdsString.includes(admin._id.toString()));
+        res.status(200).json({ ok: true, users: unassignedAdmins });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Hubo un error', error });
+    }
+});
+exports.getUnassignedAdmins = getUnassignedAdmins;
 // Controlador para obtener un usuario por su ID
 const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;

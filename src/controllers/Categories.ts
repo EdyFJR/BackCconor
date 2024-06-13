@@ -7,9 +7,13 @@ import Empresa from '../models-mongoose/Company';
 
 export const createCategory = async (req: Request, res: Response) => {
     try {
-      const{idEmpresa} = req.params
-      req.body.company =idEmpresa
-      const empresa  = await Empresa.findById(idEmpresa);
+      const{idEmpresa} = req.params;
+
+      req.body.company =idEmpresa;
+
+      const empresa  = await Empresa.findById( idEmpresa );
+
+
       if(!empresa){
         res.status(404).json({
           ok:false,

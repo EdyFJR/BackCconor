@@ -9,6 +9,7 @@ router.get('/', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, us
 router.get('/number', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.getNumberUsers);
 router.get('/admins/available', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.getAvailableAdmins);
 router.get('/company/admins/all', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.getAllAdmins);
+router.get('/company/admins/unassigned', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.getUnassignedAdmins);
 router.get('/company/admin/:adminId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminOrSysAdmin, users_1.getCompanyAdmin);
 // Rutas dinámicas con parámetros específicos
 router.get('/admins/:companyId/:adminId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.isCompanyAdmin);

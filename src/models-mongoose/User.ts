@@ -5,12 +5,12 @@ import mongoose, { Schema, Document, now } from 'mongoose';
 export interface UserDocument extends Document {
   companyId?:mongoose.Types.ObjectId;
   username: string;
-  email:string;
+  email: string;
   password: string;
   name: string;
-  role: 'admin' | 'user'|'sysadmin';
-  img?:string;
-  lastLogin?:Date;
+  role: 'admin' | 'user' | 'sysadmin' ;
+  img? : string;
+  lastLogin? : Date;
 }
 
 // Esquema del modelo de usuario
