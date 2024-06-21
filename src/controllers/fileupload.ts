@@ -60,9 +60,11 @@ export const subirArchivo = (req: Request, res: Response) => {
 
     const singleUpload = upload.single('img');
 
+    
+
     singleUpload(req, res, async function (error) {
        
-
+        
         try {
             if (error) {
                 return res.status(500).json({ error: error.message });
@@ -73,12 +75,17 @@ export const subirArchivo = (req: Request, res: Response) => {
             }
     
             const url = req.file.location;
+
+            console.log(url);
             let urlImagenActual;
+
+            console.log(`imagen actual: ${urlImagenActual}`);
+            
             switch (tipo) {
                 case 'usuarios':
                     const user = await User.findById(id, { img: url });
                     urlImagenActual = user ? user.img : null;
-                    if (!user) {
+                    if (!user) {  
                         return res.status(404).json({ error: 'usuario no encontrado' });
                     }
                     await User.findByIdAndUpdate(id, { img: url });
@@ -111,6 +118,7 @@ export const subirArchivo = (req: Request, res: Response) => {
 
 
             // Después de cargar la nueva imagen y actualizar la base de datos
+            
             if (keyImagenActual) {
                 await eliminarImagenS3('poscconor', keyImagenActual);
             }
@@ -130,6 +138,8 @@ export const subirArchivo = (req: Request, res: Response) => {
 
 
 
+
+
 const eliminarImagenS3 = async (bucket: string, key: string) => {
     const deleteParams = {
         Bucket: bucket,
@@ -137,7 +147,10 @@ const eliminarImagenS3 = async (bucket: string, key: string) => {
     };
     try {
         await s3.send(new DeleteObjectCommand(deleteParams))
-            .catch(err => { console.log(err); })
+            .catch(err => { 
+                console.log(`error al subir imagen ${err}`)
+                return err
+             })
         console.log(`Archivo ${key} eliminado con éxito`);
     } catch (err) {
         console.error("Error al eliminar archivo:", err);

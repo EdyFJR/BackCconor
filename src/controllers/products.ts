@@ -68,6 +68,7 @@ export const getProductById = async (req: Request, res: Response) => {
 // Actualizar un producto
 export const updateProduct = async (req: Request, res: Response) => {
     try {
+        console.log(req.body);
         const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedProduct) return res.status(404).json({ message: 'Producto no encontrado' });
         res.status(200).json(updatedProduct);

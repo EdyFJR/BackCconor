@@ -60,6 +60,7 @@ export const getAllNonAdminUsersOfCompany = async (req: Request, res: Response) 
 
     // Encuentra todos los usuarios de la empresa, excluyendo al administrador
     const users = await User.find({ companyId: company._id, _id: { $ne: adminId } }).exec();
+    console.log(users);
     res.status(200).json({ok:true,users});
   } catch (error) {
     console.error('Error al obtener usuarios de la empresa:', error);
@@ -190,7 +191,7 @@ export const createUser = async (req: Request, res: Response) => {
 
   const userExistsDb = await User.findOne({username:username});
   if(userExistsDb){
-    res.status(409).json({
+    return res.status(409).json({
       msg:'Usuario ya existe'
     });
   }

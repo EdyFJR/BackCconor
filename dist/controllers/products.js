@@ -78,6 +78,7 @@ exports.getProductById = getProductById;
 // Actualizar un producto
 const updateProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log(req.body);
         const updatedProduct = yield Products_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedProduct)
             return res.status(404).json({ message: 'Producto no encontrado' });

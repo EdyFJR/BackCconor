@@ -20,7 +20,6 @@ const menu_1 = require("../helpers/menu");
 const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const login = (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password } = req.body;
-    console.log(username, password);
     try {
         const usuarioDB = yield User_1.default.findOne({ username }).select('+password');
         if (!usuarioDB) {

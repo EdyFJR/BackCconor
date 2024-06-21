@@ -102,3 +102,20 @@ export const getCashRegisters = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error fetching cash registers', error });
   }
 };
+
+
+export const getOpenCashRegister = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const openCashRegister = await CashRegister.findOne({ user: userId, closed: false });
+
+    if (!openCashRegister) {
+      return res.status(404).json({ message: 'No open cash register found for this user' });
+    }
+
+    res.status(200).json(openCashRegister);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving open cash register', error });
+  }
+};

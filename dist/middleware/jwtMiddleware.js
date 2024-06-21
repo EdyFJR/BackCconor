@@ -18,7 +18,6 @@ const Company_1 = __importDefault(require("../models-mongoose/Company"));
 const jwt = require('jsonwebtoken');
 const verifyToken = (req, resp, next) => {
     const token = req.header('x-token');
-    console.log(req);
     if (!token) {
         return resp.status(401).json({
             ok: false,
@@ -27,7 +26,6 @@ const verifyToken = (req, resp, next) => {
     }
     try {
         const { uid } = jwt.verify(token, process.env.JWT);
-        console.log(uid);
         req.uid = uid;
         next();
     }
@@ -69,7 +67,6 @@ exports.validarAdminOrSysAdmin = validarAdminOrSysAdmin;
 const validarSysAdmin = (req, resp, next) => __awaiter(void 0, void 0, void 0, function* () {
     const uid = req.uid;
     try {
-        console.log(uid);
         const usuarioDB = yield User_1.default.findById(uid);
         if (!usuarioDB) {
             return resp.status(404).json({
@@ -193,7 +190,6 @@ const validarAdminCompany = (req, resp, next) => __awaiter(void 0, void 0, void 
 exports.validarAdminCompany = validarAdminCompany;
 const validarEmpresaUsuario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const token = req.headers['x-token'];
-    console.log(token);
     const { empresaId } = req.params;
     if (!token) {
         return res.status(401).json({

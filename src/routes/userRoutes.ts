@@ -28,7 +28,7 @@ router.get('/company/admin/:adminId', verifyToken, validarAdminOrSysAdmin, getCo
 
 // Rutas dinámicas con parámetros específicos
 router.get('/admins/:companyId/:adminId', verifyToken, validarSysAdmin, isCompanyAdmin);
-router.get('/company/:adminId', verifyToken, validarAdminOrSysAdmin, getAllNonAdminUsersOfCompany);
+router.get('/company/:adminId', [verifyToken, validarAdminOrSysAdmin], getAllNonAdminUsersOfCompany);
 
 // Rutas dinámicas para acciones específicas de un usuario
 router.get('/:id', verifyToken, validarSysAdmin, getUserById);

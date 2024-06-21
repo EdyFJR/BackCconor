@@ -13,7 +13,7 @@ router.get('/company/admins/unassigned', jwtMiddleware_1.verifyToken, jwtMiddlew
 router.get('/company/admin/:adminId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminOrSysAdmin, users_1.getCompanyAdmin);
 // Rutas dinámicas con parámetros específicos
 router.get('/admins/:companyId/:adminId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.isCompanyAdmin);
-router.get('/company/:adminId', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminOrSysAdmin, users_1.getAllNonAdminUsersOfCompany);
+router.get('/company/:adminId', [jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdminOrSysAdmin], users_1.getAllNonAdminUsersOfCompany);
 // Rutas dinámicas para acciones específicas de un usuario
 router.get('/:id', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarSysAdmin, users_1.getUserById);
 router.get('/company/solo/:id', jwtMiddleware_1.verifyToken, jwtMiddleware_1.validarAdmin, jwtMiddleware_1.validarAdminCompany, users_1.getUserByIdSoloAdmin);

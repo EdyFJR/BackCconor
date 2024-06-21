@@ -40,7 +40,10 @@ const createItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         req.body.company = empresaId;
         const newItem = new Item_1.default(req.body);
         const savedItem = yield newItem.save();
-        return res.status(201).json(savedItem);
+        return res.status(201).json({
+            ok: true,
+            item: savedItem
+        });
     }
     catch (error) {
         console.log(error);
@@ -177,12 +180,10 @@ const getItemsByCategory = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!category) {
             return res.status(400).json({ message: 'Category is required' });
         }
+        // Construir la consulta para buscar productos
         const query = Object.assign({ categories: { $in: [category] } }, (search && { name: { $regex: search, $options: 'i' } }));
         // Buscar productos por categoría y término de búsqueda
         const products = yield Products_1.default.find(query);
-        if (products.length === 0) {
-            return res.status(404).json({ message: 'No products found for this category' });
-        }
         // Obtener los IDs de los productos encontrados
         const productIds = products.map(product => product._id);
         // Calcular el total de ítems
@@ -193,6 +194,7 @@ const getItemsByCategory = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .populate('company')
             .skip((Number(page) - 1) * Number(limit))
             .limit(Number(limit));
+        console.log(items);
         res.status(200).json({
             items,
             totalItems,

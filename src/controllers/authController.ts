@@ -10,7 +10,7 @@ import Empresa from '../models-mongoose/Company';
 export const login = async  (req:Request, resp:Response)=>{
     
     const {username, password} = req.body
-    console.log(username, password);
+    
 
     
     try {

@@ -23,9 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// src/models/sale.model.ts
 const mongoose_1 = __importStar(require("mongoose"));
-// Esquema del modelo de venta
 const saleSchema = new mongoose_1.Schema({
     user: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -55,25 +53,31 @@ const saleSchema = new mongoose_1.Schema({
             quantity: {
                 type: Number,
                 required: true,
-                min: 1
+                min: 1,
             },
             unitPrice: {
                 type: Number,
-                required: true
+                required: true,
             },
             subtotal: {
                 type: Number,
-                required: true
-            }
+                required: true,
+            },
         },
     ],
+    paymentMethod: {
+        type: String,
+        enum: ['cash', 'card'],
+        required: true,
+    },
+    paymentReference: {
+        type: String,
+    },
+    receivedAmount: {
+        type: Number,
+    },
+    change: {
+        type: Number,
+    },
 });
-saleSchema.pre('save', function (next) {
-    this.productsSold.forEach(product => {
-        product.subtotal = product.quantity * product.unitPrice;
-    });
-    next();
-});
-// Modelo de venta
-const Sale = mongoose_1.default.model('Sale', saleSchema);
-exports.default = Sale;
+exports.default = mongoose_1.default.model('Sale', saleSchema);

@@ -7,7 +7,6 @@ export const verifyToken = (req : any, resp : Response, next:NextFunction)=>{
 
     const token = req.header('x-token');
 
-    console.log(req);
 
     if(!token){
         return resp.status(401).json({
@@ -19,7 +18,7 @@ export const verifyToken = (req : any, resp : Response, next:NextFunction)=>{
     try {
         
         const {uid} = jwt.verify(token, process.env.JWT);
-        console.log(uid);
+        
     
         req.uid = uid;
 
@@ -73,7 +72,7 @@ export const validarSysAdmin = async(req:any, resp:Response, next:any)  => {
     const uid = req.uid;
     
     try {
-        console.log(uid);
+        
         const usuarioDB = await User.findById(uid );
 
         if ( !usuarioDB ) {
@@ -223,7 +222,7 @@ export const validarAdminCompany = async(req:any, resp:Response, next:any)  => {
 }
 export const validarEmpresaUsuario = async (req: any, res: Response, next: NextFunction) => {
     const token = req.headers['x-token'];
-    console.log(token);
+    
     const { empresaId } = req.params;
 
     if (!token) {

@@ -39,7 +39,10 @@ export const createItem = async (req: Request, res: Response) => {
 
         const savedItem = await newItem.save();
 
-        return res.status(201).json(savedItem);
+        return res.status(201).json({
+          ok:true, 
+          item:savedItem
+        });
     } catch (error) {
         console.log(error);
         return res.status(400).json(error);
@@ -178,6 +181,7 @@ export const getItems = async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Category is required' });
       }
   
+      // Construir la consulta para buscar productos
       const query = {
         categories: { $in: [category] },
         ...(search && { name: { $regex: search, $options: 'i' } })
@@ -185,10 +189,7 @@ export const getItems = async (req: Request, res: Response) => {
   
       // Buscar productos por categoría y término de búsqueda
       const products = await Product.find(query);
-  
-      if (products.length === 0) {
-        return res.status(404).json({ message: 'No products found for this category' });
-      }
+      
   
       // Obtener los IDs de los productos encontrados
       const productIds = products.map(product => product._id);
@@ -203,6 +204,8 @@ export const getItems = async (req: Request, res: Response) => {
         .skip((Number(page) - 1) * Number(limit))
         .limit(Number(limit));
   
+        console.log(items);
+
       res.status(200).json({
         items,
         totalItems,

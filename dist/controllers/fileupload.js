@@ -68,7 +68,9 @@ const subirArchivo = (req, res) => {
                     return res.status(400).json({ error: 'Archivo no encontrado' });
                 }
                 const url = req.file.location;
+                console.log(url);
                 let urlImagenActual;
+                console.log(`imagen actual: ${urlImagenActual}`);
                 switch (tipo) {
                     case 'usuarios':
                         const user = yield User_1.default.findById(id, { img: url });
@@ -122,7 +124,10 @@ const eliminarImagenS3 = (bucket, key) => __awaiter(void 0, void 0, void 0, func
     };
     try {
         yield s3.send(new client_s3_1.DeleteObjectCommand(deleteParams))
-            .catch(err => { console.log(err); });
+            .catch(err => {
+            console.log(`error al subir imagen ${err}`);
+            return err;
+        });
         console.log(`Archivo ${key} eliminado con éxito`);
     }
     catch (err) {

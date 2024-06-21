@@ -65,6 +65,7 @@ const getAllNonAdminUsersOfCompany = (req, res) => __awaiter(void 0, void 0, voi
         }
         // Encuentra todos los usuarios de la empresa, excluyendo al administrador
         const users = yield User_1.default.find({ companyId: company._id, _id: { $ne: adminId } }).exec();
+        console.log(users);
         res.status(200).json({ ok: true, users });
     }
     catch (error) {
@@ -181,7 +182,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const { username, password, name, role, email, companyId } = req.body;
     const userExistsDb = yield User_1.default.findOne({ username: username });
     if (userExistsDb) {
-        res.status(409).json({
+        return res.status(409).json({
             msg: 'Usuario ya existe'
         });
     }
