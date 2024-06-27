@@ -14,6 +14,7 @@ import subscriptionRoutes from '../routes/subscriptionRoutes';
 import suppliersRoutes from '../routes/suppliersRoutes';
 import categoriesRoutes from '../routes/categoryRoutes';
 import cashRegisterRoutes from '../routes/cashRegister';
+import recipe from '../routes/recipeRouth';
 
 export class Server {
   private app: Application;
@@ -50,6 +51,7 @@ export class Server {
     this.app.use('/api/items', itemRoutes ); // Rutas para lotes
     this.app.use('/api/suppliers', suppliersRoutes ); // Rutas para lotes
     this.app.use('/api/cash-registers', cashRegisterRoutes ); // Rutas para lotes
+    this.app.use('/api/recipe', recipe  ); // Rutas para lotes
   }
 
   private async connectToAwsS3(): Promise<void> {

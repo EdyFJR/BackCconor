@@ -13,7 +13,7 @@ export const getMenuFrontEnd = (role = 'admin') => {
 
 
 
-  if (role === ' admin ') {
+  if (role === 'admin') {
     menu[0].title = 'ADMIN TOOLS'
     menu[0].id = 'admin'
     menu[0].icon = 'bi bi-cone-striped'
@@ -23,7 +23,8 @@ export const getMenuFrontEnd = (role = 'admin') => {
       { title: 'Productos', url: 'admin/products', icon: 'bi bi-bag-fill'},
       { title: 'Proveedores', url: 'admin/products', icon: 'bi bi-file-earmark-person'},
       { title: 'Lotes', url: 'admin/products', icon: 'bi bi-box2-fill'},
-      { title: 'Categorias', url: 'admin/categories', icon: 'bi bi-bookmark-fill'}
+      { title: 'Categorias', url: 'admin/categories', icon: 'bi bi-bookmark-fill'},
+      { title: 'recetas', url: 'admin/recipes', icon: 'bi bi-backpack4' },
     );
   }
   if (role === 'user') {
@@ -38,6 +39,7 @@ export const getMenuFrontEnd = (role = 'admin') => {
       { title: 'Proveedores', url: 'admin/products', icon: 'bi bi-file-earmark-person' },
       { title: 'Lotes', url: 'admin/products', icon: 'bi bi-box2-fill' },
       { title: 'Categorias', url: 'admin/categories', icon: 'bi bi-bookmark-fill' },
+      { title: 'recetas', url: 'admin/recipe', icon: 'bi bi-backpack4' },
 
     );
   }

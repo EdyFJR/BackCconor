@@ -27,6 +27,7 @@ const subscriptionRoutes_1 = __importDefault(require("../routes/subscriptionRout
 const suppliersRoutes_1 = __importDefault(require("../routes/suppliersRoutes"));
 const categoryRoutes_1 = __importDefault(require("../routes/categoryRoutes"));
 const cashRegister_1 = __importDefault(require("../routes/cashRegister"));
+const recipeRouth_1 = __importDefault(require("../routes/recipeRouth"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -54,6 +55,7 @@ class Server {
         this.app.use('/api/items', itemRoutes_1.default); // Rutas para lotes
         this.app.use('/api/suppliers', suppliersRoutes_1.default); // Rutas para lotes
         this.app.use('/api/cash-registers', cashRegister_1.default); // Rutas para lotes
+        this.app.use('/api/recipe', recipeRouth_1.default); // Rutas para lotes
     }
     connectToAwsS3() {
         return __awaiter(this, void 0, void 0, function* () {
